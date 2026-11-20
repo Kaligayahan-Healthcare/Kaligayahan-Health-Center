@@ -1461,8 +1461,8 @@ function phHolidays(y){
 }
 
 function defaultCenter(){
-  return { open:'08:00', close:'17:00', days:[1,2,3,4,5], lunchStart:'12:00', lunchEnd:'13:00',
-    sessions:[ { id:'am', name:'Morning', tl:'Umaga', start:'08:00', cutoff:'11:00' }, { id:'pm', name:'Afternoon', tl:'Hapon', start:'13:00', cutoff:'16:00' } ],
+  return { open:'08:00', close:'20:00', days:[1,2,3,4,5], lunchStart:'12:00', lunchEnd:'13:00',
+    sessions:[ { id:'am', name:'Morning', tl:'Umaga', start:'08:00', cutoff:'11:00' }, { id:'pm', name:'Afternoon', tl:'Hapon', start:'13:00', cutoff:'19:00' } ],
     force:'auto', forceNote:'', lockSite:false, demo:false, grace:15,
     autoHolidays:true, noticeDays:1, smsOn:false, cutNow:null, restockPct:20, pharmacyEmail:'pharmacy@kaligayahan.example' };
 }
@@ -1896,7 +1896,7 @@ function sanitizeImport(d){
   (d.medRequests || []).forEach(r => { r.id = id(r.id); r.medId = id(r.medId); r.qty = num(r.qty, 1); r.code = tok(r.code); });
   ['announcements','closures','sms'].forEach(c => (d[c] || []).forEach(x => { x.id = id(x.id); }));
   (d.closures || []).forEach(x => { x.open = hm(x.open, ''); x.close = hm(x.close, ''); });
-  const c = d.center || {}; c.open = hm(c.open, '08:00'); c.close = hm(c.close, '17:00'); c.lunchStart = hm(c.lunchStart, ''); c.lunchEnd = hm(c.lunchEnd, '');
+  const c = d.center || {}; c.open = hm(c.open, '08:00'); c.close = hm(c.close, '20:00'); c.lunchStart = hm(c.lunchStart, ''); c.lunchEnd = hm(c.lunchEnd, '');
   (c.sessions || []).forEach(s => { s.id = id(s.id); s.start = hm(s.start, '08:00'); s.cutoff = hm(s.cutoff, '11:00'); });
   return d;
 }
