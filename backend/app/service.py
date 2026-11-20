@@ -45,6 +45,31 @@ def first_run_setup() -> None:
                 db.upsert("services", s, "setup")
             db.kv_set("created", L.now()["date"])
             db.kv_set("sample", False)
+            db.kv_set("hoursV", 2)
+        db.bump()
+    update_hours()
+
+
+def update_hours() -> None:
+    """One-time update (Nov 2026): the clinic is open until 8 PM and online queueing for the
+    afternoon closes at 7 PM. Only the old default times (5 PM / 4 PM) are changed."""
+    if db.kv_get("hoursV"):
+        return
+    c = db.kv_get("center") or {}
+    changed = False
+    if c.get("close") == "17:00":
+        c["close"] = "20:00"
+        changed = True
+    for s in c.get("sessions") or []:
+        if s.get("id") == "pm" and s.get("cutoff") == "16:00":
+            s["cutoff"] = "19:00"
+            changed = True
+    with db.tx():
+        if changed:
+            db.kv_set("center", c)                     # every other setting is kept exactly as it was
+        db.kv_set("hoursV", 2)
+    if changed:
+        audit("settings.hours", "center", {"close": "20:00", "afternoon_cutoff": "19:00"}, actor="system")
         db.bump()
 
 

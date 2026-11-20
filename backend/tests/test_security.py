@@ -213,6 +213,26 @@ def cutoff_blocks_bookings():
 
 
 @test
+def old_5pm_closing_is_updated_to_8pm_once():
+    saved = db.kv_get("center")
+    old = {**saved, "close": "17:00", "pharmacyEmail": "keep@example.com",
+           "sessions": [{**s, "cutoff": "16:00"} if s["id"] == "pm" else s for s in saved["sessions"]]}
+    db.kv_set("center", old)
+    db.conn().execute("DELETE FROM kv WHERE key='hoursV'")
+    try:
+        service.update_hours()
+        c = db.kv_get("center")
+        assert c["close"] == "20:00" and [s["cutoff"] for s in c["sessions"] if s["id"] == "pm"] == ["19:00"]
+        assert c["pharmacyEmail"] == "keep@example.com" and c["open"] == saved["open"]      # nothing else changed
+        c["close"] = "18:00"                                  # a time staff chose later is never overwritten
+        db.kv_set("center", c)
+        service.update_hours()
+        assert db.kv_get("center")["close"] == "18:00"
+    finally:
+        db.kv_set("center", saved)
+
+
+@test
 def sql_injection_is_just_text():
     evil = "Robert'); DROP TABLE tickets;--"
     r = client.post("/api/public/tickets", json=booking(svc="AR", name=evil, contact="09170000001", email="", device="dev-iiiiiiiiiiiiiii"))

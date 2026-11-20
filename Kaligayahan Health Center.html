@@ -1762,6 +1762,12 @@ function migrate(){
     ch = true;
   }
   if (!S.stockHist) { S.stockHist = {}; ch = true; }
+  if (!S.hoursV || S.hoursV < 2) {     // v2.4: open until 8 PM, afternoon online cut-off 7 PM (only if still the old defaults)
+    if (c.close === '17:00') c.close = '20:00';
+    const pm = (c.sessions || []).find(s => s.id === 'pm');
+    if (pm && pm.cutoff === '16:00') pm.cutoff = '19:00';
+    S.hoursV = 2; ch = true;
+  }
   if (!S.rev || S.rev < 3) {           // v2.3: staff accounts, sample-data label, practice mode off by default
     S.rev = 3; c.demo = false;
     if (S.sample == null) S.sample = false;
