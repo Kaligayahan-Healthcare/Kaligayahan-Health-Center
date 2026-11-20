@@ -199,10 +199,13 @@ def server_enforces_rules_not_the_browser():
 @test
 def cutoff_blocks_bookings():
     old = CLOCK["min"]
-    CLOCK["min"] = 16 * 60 + 5
+    CLOCK["min"] = 19 * 60 + 5                      # 7:05 PM: after the afternoon cut-off (open until 8 PM)
     try:
         r = client.post("/api/public/tickets", json=booking(contact="09190000000", email="", device="dev-hhhhhhhhhhhhhhh"))
         assert r.status_code == 409 and "cut-off" in r.json()["error"].lower()
+        CLOCK["min"] = 16 * 60 + 5                  # 4:05 PM is still open for online queueing
+        assert client.get("/api/public/state?rev=-1").json()["state"]["center"]["sessions"][1]["cutoff"] == "19:00"
+        CLOCK["min"] = 19 * 60 + 5
         r = client.post("/api/public/med-requests", json={"medId": "x", "qty": 1, "name": "Ana Reyes", "contact": "09190000000", "consent": True, "elapsed": 6000, "pow": solve()})
         assert r.status_code in (400, 409)
     finally:
