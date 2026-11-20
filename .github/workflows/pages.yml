@@ -31,6 +31,10 @@ jobs:
           rm -f _site/staff.html
           # the "page not found" page is shown at any address, so its links need the full path
           sed -i "s|href=\"/favicon.png\"|href=\"/$REPO/favicon.png\"|; s|href=\"/fonts/fonts.css\"|href=\"/$REPO/fonts/fonts.css\"|; s|href=\"/styles.css\"|href=\"/$REPO/styles.css\"|; s|href=\"/\"|href=\"/$REPO/\"|" _site/404.html
+          # a new name for the script and styles on every publish, so browsers never keep an old copy
+          V="${GITHUB_SHA::7}"
+          sed -i "s|src=\"app.js\"|src=\"app.js?v=$V\"|; s|href=\"styles.css\"|href=\"styles.css?v=$V\"|; s|href=\"fonts/fonts.css\"|href=\"fonts/fonts.css?v=$V\"|" _site/index.html
+          grep -q "app.js?v=$V" _site/index.html
           touch _site/.nojekyll
 
       - name: Update the gh-pages branch
