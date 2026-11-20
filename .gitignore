@@ -1,0 +1,30 @@
+﻿# Never upload: patient data, keys, local settings
+database/
+*.sqlite3
+*.sqlite3-*
+*.bkhc
+*.tmp
+secrets.json
+RECOVERY-KIT.txt
+FIRST-LOGIN-PASSWORDS.txt
+.env
+*.crt
+*.pem
+
+# Made on each computer
+backend/.venv/
+venv/
+__pycache__/
+*.pyc
+.claude/
+Open Live Excel folder.url
+
+
+# Kept on this computer only (not part of the website)
+BHC BUILDING .JPG
+ChatGPT Image*.png
+*.mp4
+nishi ney niga niga ney ney (1).html
+paper of the study/
+features/
+unused-assets/

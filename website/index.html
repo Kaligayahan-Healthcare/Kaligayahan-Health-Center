@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kaligayahan Health Center</title>
+<meta name="description" content="Barangay Kaligayahan Health Center Availability Tracking System — check if the health center is open, which health personnel are on duty, medicine stock, and get a queue number online.">
+<meta name="theme-color" content="#1F3FCF">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#app">Skip to main content</a>
+
+<header class="site-header">
+  <div class="wrap hdr">
+    <a class="brand" href="#home" aria-label="Barangay Kaligayahan Health Center, go to home page">
+      <span class="logo" aria-hidden="true"></span>
+      <div><b>Barangay Kaligayahan<br>Health Center</b><span>Availability Tracking System</span></div>
+    </a>
+    <nav class="mainnav" id="nav" aria-label="Main menu"></nav>
+    <div class="hdr-tools">
+      <a class="emg-btn" href="#emergency" aria-label="Emergency information"><span class="emg-dot" aria-hidden="true">!</span><span class="emg-lbl">Emergency</span></a>
+      <button class="icon-btn" type="button" data-act="textSize" aria-label="Change text size" title="Text size"><span aria-hidden="true" class="aa">A<small>A</small></span></button>
+      <button class="icon-btn" type="button" data-act="contrast" aria-pressed="false" id="contrastBtn" aria-label="High contrast" title="High contrast"><span aria-hidden="true" class="ct"></span></button>
+      <button class="menu-btn" type="button" id="menuBtn" data-act="menu" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="nav-scrim" data-act="menu" aria-hidden="true"></div>
+
+<main id="app" tabindex="-1"><div class="boot" role="status"><span class="boot-spin" aria-hidden="true"></span><b>Loading…</b><span>Getting the latest information from the health center.</span></div>
+<noscript><div class="boot"><b>Please turn on JavaScript</b><span>This website needs JavaScript to show the queue and the health center's status. You can also call 0963-154-1440.</span></div></noscript></main>
+
+<nav class="tabbar no-print" id="tabbar" aria-label="Quick menu"></nav>
+
+<footer class="foot">
+  <div class="wrap">
+    <div>
+      <b>Barangay Kaligayahan Health Center</b><br>
+      58 Kingfisher St., Zabarte Subdivision,<br>Brgy. Kaligayahan, Quezon City<br>
+      <span id="footHours"></span>
+    </div>
+    <div>
+      <b>Hotline</b><br>
+      <a href="tel:+639631541440">0963-154-1440</a> · <a href="tel:+63271484934">7148-4934</a><br>
+      Emergency: <a href="tel:911">911</a><br>
+      Services are free for barangay residents.
+    </div>
+    <div class="no-print">
+      <b>Quick links</b><br>
+      <a href="#queue">Online queue</a> · <a href="#ticket">My ticket</a> · <a href="#emergency">Emergency</a><br>
+      <a href="#privacy">Privacy Notice</a><br>
+      <span class="small" id="sampleNote"></span>
+    </div>
+  </div>
+</footer>
+
+<div id="modalRoot"></div>
+<div id="toastRoot" aria-live="polite"></div>
+
+<script src="vendor/qrcode.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Pinned versions. Install with:  py -3 -m pip install -r backend/requirements.txt
+fastapi==0.115.6
+uvicorn==0.32.1
+pydantic==2.10.4
+argon2-cffi==23.1.0
+cryptography==44.0.0
+openpyxl==3.1.5
+msoffcrypto-tool==5.4.2
+httpx==0.28.1
+psycopg[binary]==3.2.3
