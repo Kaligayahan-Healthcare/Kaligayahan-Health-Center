@@ -1,0 +1,1495 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
+<title>Kaligayahan Health Center Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#7AD9FF; --on-bg:#062A3D; --on-bg-muted:#123F57;
+  --surface:#FFFFFF; --surface-2:#E8F8FF; --ink:#062A3D; --ink-2:#1F4A61; --muted:#4A6C80;
+  --line:#C5E7F6; --line-2:#9FD3EB;
+  --primary:#0A6E9E; --primary-ink:#FFFFFF; --primary-soft:#D6F2FE; --primary-deep:#064A6E;
+  --strip:#064A6E; --board:#062A3D; --board-num:#7AD9FF;
+  --ok:#1C7F46; --ok-soft:#DDF3E5; --warn:#A8650A; --warn-soft:#FBEBD2; --crit:#BC3228; --crit-soft:#FBE1DE;
+  --info:#0A6E9E; --info-soft:#DCF3FE; --prio:#6A43A8; --prio-soft:#EEE7F8;
+  --shadow:0 1px 2px rgba(6,42,61,.08),0 6px 18px rgba(6,42,61,.10);
+  --radius:12px; --radius-sm:8px;
+  --f-display:"Lexend",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.2;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:1.75rem;font-weight:600}
+h2{font-size:1.35rem;font-weight:600}
+h3{font-size:1.05rem;font-weight:600}
+p{margin:0}
+a{color:var(--primary)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--primary-deep);outline-offset:2px;border-radius:6px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+.eyebrow{font-family:var(--f-display);font-size:.72rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:16px}
+@media (min-width:720px){.wrap{padding-inline:24px}}
+
+/* ---------- top bar ---------- */
+.topbar{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.topbar .wrap{display:flex;align-items:center;gap:12px;min-height:64px;flex-wrap:wrap;padding-block:8px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);margin-right:auto;min-width:0}
+.seal{width:40px;height:40px;flex:none}
+.brand b{font-family:var(--f-display);font-weight:600;font-size:1rem;display:block;line-height:1.15}
+.brand span{font-size:.78rem;color:var(--muted);display:block;line-height:1.2}
+.clock{font-family:var(--f-mono);font-size:.82rem;color:var(--ink-2);display:flex;align-items:center;gap:8px}
+.nav-btn{border:1px solid var(--line-2);background:transparent;border-radius:999px;padding:6px 14px;font-weight:600;font-size:.9rem;cursor:pointer;color:var(--ink-2)}
+.nav-btn:hover{border-color:var(--primary);color:var(--primary)}
+
+/* ---------- status strip ---------- */
+.strip{background:var(--strip);color:#fff}
+.strip .wrap{display:flex;gap:10px 22px;align-items:center;flex-wrap:wrap;padding-block:10px;font-size:.92rem}
+.strip .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:1px}
+.strip strong{font-family:var(--f-display);font-weight:600;letter-spacing:.02em}
+
+/* ---------- pills ---------- */
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:600;white-space:nowrap;line-height:1.6}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.plain::before{display:none}
+.ok{color:var(--ok);background:var(--ok-soft)}
+.warn{color:var(--warn);background:var(--warn-soft)}
+.crit{color:var(--crit);background:var(--crit-soft)}
+.info{color:var(--info);background:var(--info-soft)}
+.prio{color:var(--prio);background:var(--prio-soft)}
+.neutral{color:var(--muted);background:var(--surface-2)}
+
+/* ---------- layout ---------- */
+main{padding-block:24px 56px}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.page-head p,.page-head .muted{color:var(--on-bg-muted)!important;max-width:62ch}
+.page-head .eyebrow,main > section > .page-head .eyebrow{color:var(--on-bg-muted)}
+.card .back,.receipt .back{color:var(--primary)}
+.back{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--on-bg);background:none;border:0;padding:0;cursor:pointer;margin-bottom:10px;font-size:.92rem}
+.stack{display:flex;flex-direction:column;gap:16px}
+.grid-2{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+.card.flat{box-shadow:none}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+
+/* ---------- home hero ---------- */
+.hero{display:grid;gap:18px;grid-template-columns:1fr;align-items:stretch;margin-bottom:22px}
+@media (min-width:860px){.hero{grid-template-columns:1.35fr 1fr}}
+.hero-main{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;gap:14px}
+.hero-main h1{font-size:clamp(1.5rem,3.2vw,2.05rem)}
+.status-big{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.status-badge{font-family:var(--f-display);font-weight:700;font-size:1.05rem;letter-spacing:.06em;padding:8px 16px;border-radius:10px}
+.hero-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.hero-meta div{background:var(--surface-2);border-radius:var(--radius-sm);padding:10px 12px}
+.hero-meta b{display:block;font-family:var(--f-display);font-size:1.3rem;font-weight:600;font-variant-numeric:tabular-nums}
+.hero-meta span{font-size:.8rem;color:var(--muted)}
+.serving-board{background:var(--board);color:#fff;box-shadow:var(--shadow);border-radius:var(--radius);padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.serving-board .eyebrow{color:inherit;opacity:.7}
+.sb-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-top:1px solid rgba(255,255,255,.12);padding-top:8px}
+.sb-row:first-of-type{border-top:0}
+.sb-row span{font-size:.92rem;opacity:.9;min-width:0}
+.sb-row .sb-sub{display:block;font-size:.78rem;opacity:.7;font-family:var(--f-mono)}
+.sb-row b{font-family:var(--f-mono);font-size:1.45rem;color:var(--board-num);letter-spacing:.02em}
+.sb-row b.idle{color:inherit;opacity:.5;font-size:1rem}
+
+/* ---------- service tiles (qceservices-style) ---------- */
+.tiles{display:grid;gap:14px;grid-template-columns:1fr}
+@media (min-width:480px){.tiles{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:820px){.tiles{grid-template-columns:repeat(3,1fr)}}
+.tile{background:var(--surface);border:1px solid var(--surface);box-shadow:0 1px 2px rgba(6,42,61,.08);border-radius:var(--radius-sm);padding:22px 16px 18px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;cursor:pointer;color:var(--ink);transition:border-color .15s,transform .15s,box-shadow .15s;position:relative}
+.tile:hover{border-color:var(--primary);box-shadow:var(--shadow);transform:translateY(-2px)}
+.tile svg{width:54px;height:54px;color:var(--primary)}
+.tile b{font-family:var(--f-display);font-weight:500;color:var(--primary-deep);font-size:1rem;line-height:1.3}
+.tile small{color:var(--muted);font-size:.82rem;line-height:1.3}
+.tile .pill{position:absolute;top:10px;right:10px}
+@media (prefers-reduced-motion:reduce){.tile{transition:none}.tile:hover{transform:none}}
+
+/* ---------- lists / tables ---------- */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.search{flex:1 1 240px;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line-2);border-radius:10px;padding:0 12px}
+.search input{border:0;background:transparent;padding:10px 0;width:100%;outline:none}
+.search:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:.86rem;font-weight:600;cursor:pointer;color:var(--ink-2)}
+.chip[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.94rem}
+th{font-family:var(--f-display);font-weight:500;font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--surface-2);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td .sub{display:block;font-size:.82rem;color:var(--muted)}
+.letter-row td{background:var(--surface-2);font-family:var(--f-display);font-weight:600;color:var(--primary);padding:5px 14px;font-size:.85rem}
+
+/* doctor cards */
+.doc-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr))}
+.doc{display:flex;gap:14px;align-items:flex-start}
+.avatar{width:48px;height:48px;border-radius:50%;background:var(--primary-soft);color:var(--primary-deep);display:grid;place-items:center;font-family:var(--f-display);font-weight:600;flex:none}
+.doc h3{margin-bottom:2px}
+.doc .meta{display:flex;flex-direction:column;gap:6px;min-width:0}
+.days{display:flex;gap:4px;flex-wrap:wrap}
+.days span{font-family:var(--f-mono);font-size:.72rem;padding:2px 6px;border-radius:5px;background:var(--surface-2);color:var(--muted)}
+.days span.on{background:var(--primary-soft);color:var(--primary-deep);font-weight:700}
+.days span.today{outline:1.5px solid var(--primary)}
+
+/* ---------- buttons & forms ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;padding:10px 18px;font-weight:600;border:1px solid transparent;cursor:pointer;font-size:.95rem;text-decoration:none;line-height:1.2}
+.btn.primary{background:var(--primary);color:var(--primary-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{background:var(--surface);border-color:var(--line-2);color:var(--ink)}
+.btn.ghost:hover{border-color:var(--primary);color:var(--primary)}
+.btn.danger{background:var(--surface);border-color:var(--crit);color:var(--crit)}
+.btn.sm{padding:6px 11px;font-size:.84rem;border-radius:8px}
+.btn[disabled]{opacity:.45;cursor:not-allowed;filter:none}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-weight:600;font-size:.9rem}
+.field .hint{font-size:.8rem;color:var(--muted)}
+input[type=text],input[type=number],input[type=tel],input[type=time],input[type=date],input[type=password],select,textarea{background:var(--surface);border:1px solid var(--line-2);border-radius:9px;padding:9px 11px;width:100%;min-width:0}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.form-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr))}
+.check{display:flex;align-items:center;gap:8px;font-weight:500}
+.check input{width:18px;height:18px;accent-color:var(--primary)}
+.err{color:var(--crit);font-size:.88rem;font-weight:600}
+
+/* ---------- queue steps ---------- */
+.steps{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.steps li{list-style:none;box-shadow:0 1px 2px rgba(6,42,61,.08);display:flex;align-items:center;gap:8px;font-size:.88rem;color:var(--muted);font-weight:600;padding:6px 12px 6px 6px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+.steps li i{font-style:normal;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);font-family:var(--f-mono);font-size:.78rem}
+.steps li.cur{color:var(--primary-deep);border-color:var(--primary)}
+.steps li.cur i,.steps li.done i{background:var(--primary);color:var(--primary-ink)}
+.steps{padding:0;margin-top:0}
+.choice-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+.choice{background:var(--surface);border:1.5px solid var(--line-2);border-radius:var(--radius);padding:16px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;color:var(--ink)}
+.choice:hover:not([disabled]){border-color:var(--primary)}
+.choice[aria-pressed="true"]{border-color:var(--primary);background:var(--primary-soft)}
+.choice[disabled]{cursor:not-allowed;opacity:.6}
+.choice b{font-family:var(--f-display);font-weight:600;font-size:1.02rem}
+.choice .code{font-family:var(--f-mono);font-weight:700;font-size:.8rem;color:var(--primary);background:var(--primary-soft);border-radius:6px;padding:1px 7px;align-self:flex-start}
+.choice .stats{display:flex;gap:12px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);margin-top:4px}
+.choice .stats b{font-family:var(--f-mono);font-size:.84rem;color:var(--ink)}
+
+/* ---------- receipt ---------- */
+.receipt{max-width:420px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.receipt-top{background:var(--primary);color:var(--primary-ink);padding:16px 20px;display:flex;align-items:center;gap:12px}
+.receipt-top b{font-family:var(--f-display);font-weight:600;display:block}
+.receipt-top span{font-size:.8rem;opacity:.85}
+.receipt-body{padding:20px;display:flex;flex-direction:column;gap:14px}
+.qnum{text-align:center}
+.qnum .big{font-family:var(--f-mono);font-weight:700;font-size:3.4rem;letter-spacing:.02em;line-height:1.1;color:var(--primary-deep)}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rgrid div{background:var(--surface-2);border-radius:8px;padding:9px 11px}
+.rgrid b{display:block;font-family:var(--f-mono);font-size:1.15rem}
+.rgrid span{font-size:.76rem;color:var(--muted)}
+.perf{border-top:2px dashed var(--line-2);margin:0 -20px;position:relative}
+.perf::before,.perf::after{content:"";position:absolute;top:-11px;width:20px;height:20px;border-radius:50%;background:var(--bg)}
+.perf::before{left:-10px}.perf::after{right:-10px}
+.rlines{display:flex;flex-direction:column;gap:4px;font-size:.9rem}
+.rlines div{display:flex;justify-content:space-between;gap:10px}
+.rlines span{color:var(--muted)}
+.vcode{display:flex;align-items:center;gap:14px;justify-content:center;flex-wrap:wrap}
+.vcode .code{font-family:var(--f-mono);font-weight:700;font-size:1.3rem;letter-spacing:.12em;background:var(--surface-2);padding:6px 12px;border-radius:8px}
+#qr,.qrbox{width:104px;height:104px;background:#fff;padding:6px;border-radius:8px}
+.qrbox img,.qrbox canvas{width:92px!important;height:92px!important}
+
+/* ---------- announcements ---------- */
+.ann{display:flex;gap:14px;align-items:flex-start}
+.ann-date{flex:none;width:54px;text-align:center;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.ann-date span{display:block;background:var(--primary);color:var(--primary-ink);font-size:.7rem;font-weight:700;letter-spacing:.08em;padding:2px 0;font-family:var(--f-display)}
+.ann-date b{display:block;font-family:var(--f-display);font-size:1.3rem;padding:3px 0}
+.ann h3{margin:4px 0 4px}
+.ann p{color:var(--ink-2);max-width:68ch}
+.list{display:flex;flex-direction:column}
+.list > *{padding-block:14px;border-top:1px solid var(--line)}
+.list > *:first-child{border-top:0;padding-top:0}
+.list > *:last-child{padding-bottom:0}
+
+/* ---------- admin ---------- */
+.admin-shell{display:grid;gap:20px;grid-template-columns:1fr}
+@media (min-width:900px){.admin-shell{grid-template-columns:220px 1fr}}
+.side{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+@media (min-width:900px){.side{flex-direction:column;position:sticky;top:90px;align-self:start;overflow:visible}}
+.side button{display:flex;align-items:center;gap:10px;background:transparent;border:0;border-radius:9px;padding:9px 12px;cursor:pointer;font-weight:600;color:var(--on-bg);white-space:nowrap;text-align:left}
+.side button svg{width:18px;height:18px;flex:none;stroke-width:3.4}
+.side button:hover{background:rgba(255,255,255,.55)}
+.side button[aria-current="page"]{background:var(--surface);color:var(--primary-deep);box-shadow:var(--shadow)}
+.kpis{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr));margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.kpi b{font-family:var(--f-display);font-size:1.8rem;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.kpi span{font-size:.84rem;color:var(--muted)}
+.kpi.alert b{color:var(--crit)}
+.qcards{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,185px),1fr))}
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:10px}
+.qcard .now{font-family:var(--f-mono);font-size:2rem;font-weight:700;color:var(--primary-deep);line-height:1}
+.qcard .now.idle{color:var(--muted);font-size:1.1rem}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-family:var(--f-body);font-size:13px}
+.report{font-family:var(--f-mono);font-size:.92rem;background:var(--surface-2);border-radius:10px;padding:16px;white-space:pre-wrap;line-height:1.7;overflow-x:auto}
+.login{max-width:400px;margin:24px auto}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;font-weight:600;z-index:50;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+.modal-bg{position:fixed;inset:0;background:rgba(6,42,61,.55);display:grid;place-items:center;padding:16px;z-index:40}
+.modal{background:var(--surface);border-radius:14px;max-width:560px;width:100%;max-height:90vh;overflow:auto;padding:22px;border:1px solid var(--line)}
+.modal h2{margin-bottom:14px}
+.foot{border-top:1px solid rgba(6,42,61,.18);padding-block:18px 28px;color:var(--on-bg-muted);font-size:.84rem}
+.foot .wrap{display:flex;gap:8px 20px;flex-wrap:wrap;justify-content:space-between}
+.notice{border-radius:10px;padding:12px 14px;font-size:.93rem;display:flex;gap:10px;align-items:flex-start}
+.notice svg{width:20px;height:20px;flex:none;margin-top:1px;stroke-width:3.4}
+.empty{padding:24px;text-align:center;color:var(--muted)}
+.inline-num{width:84px!important}
+/* ---------- priority ID validation ---------- */
+.track{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0}
+.track li{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start;position:relative;padding-bottom:12px;font-size:.9rem;color:var(--muted)}
+.track li:last-child{padding-bottom:0}
+.track li::before{content:"";width:18px;height:18px;border-radius:50%;border:2px solid var(--line-2);background:var(--surface);margin:2px 0 0 3px;box-sizing:border-box}
+.track li::after{content:"";position:absolute;left:12px;top:22px;bottom:2px;width:2px;background:var(--line)}
+.track li:last-child::after{display:none}
+.track li.done{color:var(--ink)}
+.track li.done::before{background:var(--ok);border-color:var(--ok)}
+.track li.cur{color:var(--ink);font-weight:600}
+.track li.cur::before{border-color:var(--warn);background:var(--warn-soft);box-shadow:0 0 0 4px var(--warn-soft)}
+.track li.bad::before{background:var(--crit);border-color:var(--crit)}
+.track small{display:block;font-weight:400;color:var(--muted)}
+.valbox{border:1.5px solid var(--warn);background:var(--warn-soft);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.valbox.ok{border-color:var(--ok);background:var(--ok-soft)}
+.valbox.bad{border-color:var(--crit);background:var(--crit-soft)}
+.valbox h4{font-family:var(--f-display);font-size:.95rem;font-weight:600;margin:0}
+.timer{font-family:var(--f-mono);font-weight:700;font-variant-numeric:tabular-nums}
+.timer.over{color:var(--crit)}
+.vcards{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.vcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:12px}
+.vcard.checking{border:2px solid var(--warn)}
+.vhead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.vhead .mono{font-size:1.5rem;font-weight:700;color:var(--primary-deep);line-height:1}
+.vfacts{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.88rem}
+.vfacts dt{color:var(--muted)}
+.vfacts dd{margin:0;font-weight:600;min-width:0;overflow-wrap:anywhere}
+.checklist{display:flex;flex-direction:column;gap:6px;background:var(--surface-2);border-radius:8px;padding:10px 12px}
+.checklist .check{font-size:.88rem}
+.thumb{width:100%;max-height:150px;object-fit:cover;border-radius:8px;border:1px solid var(--line);cursor:zoom-in;background:var(--surface-2)}
+.nophoto{border:1px dashed var(--line-2);border-radius:8px;padding:10px;text-align:center;font-size:.84rem;color:var(--muted)}
+.tbar{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden;position:relative}
+.tbar i{position:absolute;inset:0 auto 0 0;background:var(--ok);border-radius:99px}
+.tbar b{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink);opacity:.35}
+.proofbox{border:1px solid var(--line-2);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px;background:var(--surface-2)}
+.proofbox legend{font-family:var(--f-display);font-weight:600;padding:0 6px}
+.preview{max-width:220px;border-radius:8px;border:1px solid var(--line)}
+@media (min-width:600px){.kpis.kpis-3{grid-template-columns:repeat(3,1fr)}}
+.badge-n{background:var(--crit);color:#fff;border-radius:99px;font-size:.72rem;padding:0 7px;margin-left:auto;font-family:var(--f-mono)}
+.bar{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden;min-width:70px}
+.bar i{display:block;height:100%;border-radius:99px}
+</style>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#home" aria-label="Barangay Kaligayahan Health Center home">
+      <svg class="seal" viewBox="0 0 40 40" aria-hidden="true">
+        <circle cx="20" cy="20" r="19" fill="var(--primary)"/>
+        <circle cx="20" cy="20" r="15.5" fill="none" stroke="var(--primary-ink)" stroke-width="1" opacity=".55"/>
+        <path d="M17 11h6v6h6v6h-6v6h-6v-6h-6v-6h6z" fill="var(--primary-ink)"/>
+      </svg>
+      <div><b>Barangay Kaligayahan Health Center</b><span>Availability Tracking System · Novaliches, Quezon City</span></div>
+    </a>
+    <div class="clock" id="clock" aria-live="off"></div>
+    <button class="nav-btn" id="adminBtn" type="button">Staff login</button>
+  </div>
+</header>
+<div class="strip" id="strip"></div>
+<main class="wrap" id="app"></main>
+<footer class="foot"><div class="wrap"><span>Barangay Kaligayahan Health Center · <span id="footHours">Operating hours: Open anytime</span></span></div></footer>
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+(() => {
+"use strict";
+/* =========================================================
+   Barangay Kaligayahan Health Center Availability Tracking System
+   Prototype — all data is stored in this browser (localStorage).
+   ========================================================= */
+const TZ = 'Asia/Manila';
+const KEY = 'bkhc-state-v2', TKEY = 'bkhc-mytickets', AKEY = 'bkhc-admin';
+const ls = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+};
+const ss = {
+  get(k){ try { return sessionStorage.getItem(k); } catch(e){ return memSS[k] ?? null; } },
+  set(k,v){ memSS[k]=v; try { sessionStorage.setItem(k,v); } catch(e){} },
+  del(k){ delete memSS[k]; try { sessionStorage.removeItem(k); } catch(e){} }
+};
+const memSS = {};
+const $ = s => document.querySelector(s);
+const app = $('#app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const uid = () => Math.random().toString(36).slice(2,10);
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DOW_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MON = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+/* ---------- time helpers (always Philippine time) ---------- */
+function now(){
+  const d = new Date(), p = {};
+  new Intl.DateTimeFormat('en-US',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23',weekday:'short'})
+    .formatToParts(d).forEach(x => p[x.type] = x.value);
+  const h = (+p.hour) % 24, m = +p.minute;
+  return { date:`${p.year}-${p.month}-${p.day}`, h, m, s:+p.second, min:h*60+m, dow:DOW.indexOf(p.weekday) };
+}
+const toMin = t => { const [h,m] = String(t).split(':').map(Number); return h*60 + (m||0); };
+function fmt(min){ min = Math.round(min); let h = Math.floor(min/60)%24, m = ((min%60)+60)%60; const ap = h>=12?'PM':'AM'; h = h%12||12; return `${h}:${pad(m)} ${ap}`; }
+const fmtT = t => fmt(toMin(t));
+function ymd(ds){ return ds.split('-').map(Number); }
+function addDays(ds,n){ const [y,mo,d] = ymd(ds); return new Date(Date.UTC(y,mo-1,d+n)).toISOString().slice(0,10); }
+function dowOf(ds){ const [y,mo,d] = ymd(ds); return new Date(Date.UTC(y,mo-1,d)).getUTCDay(); }
+function dateLong(ds){ const [y,mo,d] = ymd(ds); return new Date(Date.UTC(y,mo-1,d)).toLocaleDateString('en-US',{timeZone:'UTC',weekday:'long',month:'long',day:'numeric',year:'numeric'}); }
+function dateShort(ds){ const [y,mo,d] = ymd(ds); return new Date(Date.UTC(y,mo-1,d)).toLocaleDateString('en-US',{timeZone:'UTC',weekday:'short',month:'short',day:'numeric'}); }
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+
+/* ---------- labels ---------- */
+const MED_ST = { available:['ok','Available'], low:['warn','Low stock'], out:['crit','Out of stock'] };
+const T_ST = { waiting:['info','Waiting'], serving:['ok','Next in line'], served:['neutral','Served'], skipped:['warn','Skipped'], noshow:['crit','No-show'], cancelled:['neutral','Cancelled'] };
+const PRIO = { senior:'Senior citizen', pwd:'Person with disability', pregnant:'Pregnant', regular:'Regular' };
+const VAL_MIN = 3, VAL_MAX = 5; // target minutes for staff to validate a priority ID / proof
+const PROOFS = {
+  senior:['Senior Citizen ID (OSCA)','Government ID showing birthdate'],
+  pwd:['PWD ID','Medical certificate of disability'],
+  pregnant:["MCH booklet (Mother's book)",'Prenatal record or ultrasound result','Medical certificate of pregnancy']
+};
+const VAL_ST = { pending:['warn','Awaiting ID validation'], checking:['warn','Validating ID'], approved:['ok','ID validated'], rejected:['crit','ID not validated'] };
+const isValidated = t => t.prio === 'regular' || !t.val || t.val.status === 'approved';
+function fmtDur(ms){ ms = Math.max(0, ms); const s = Math.floor(ms/1000); return `${Math.floor(s/60)}:${pad(s%60)}`; }
+function tsFor(ds, min){ const [y,mo,d] = ds.split('-').map(Number); return Date.UTC(y, mo-1, d, 0, min) - 8*3600*1000; }
+const ANN_T = { leave:['crit','Doctor on leave'], schedule:['info','Schedule / Holiday'], cutoff:['warn','Service cut-off'], general:['ok','General'] };
+const medStatusFor = (stock,thr) => stock <= 0 ? 'out' : stock <= thr ? 'low' : 'available';
+const pill = (k,t,plain) => `<span class="pill ${k}${plain?' plain':''}">${esc(t)}</span>`;
+
+/* ---------- seed data ---------- */
+function seed(){
+  const n = now(), T = n.date, rnd = mulberry32(20260925);
+  const center = { alwaysOpen:true, open:'08:00', close:'17:00', days:[1,2,3,4,5], force:'auto', forceNote:'', outside:'queue', demo:false };
+  const services = [
+    { code:'CU', name:'General Check-up', tl:'Konsulta', desc:'Consultation for fever, cough, blood pressure follow-up and other common illnesses.', avg:12, limit:40, cutoff:'', open:true, note:'', startedOn:'' },
+    { code:'AR', name:'Anti-Rabies', tl:'Bakuna kontra rabies', desc:'Post-exposure vaccination for animal bites and scratches. Bring your bite record card.', avg:10, limit:25, cutoff:'', open:true, note:'', startedOn:'' },
+    { code:'VX', name:'Vaccination', tl:'Bakuna / Immunization', desc:'Routine child immunization, flu and pneumococcal vaccines for senior citizens.', avg:8, limit:40, cutoff:'', open:true, note:'', startedOn:'' },
+    { code:'PN', name:'Prenatal Check-up', tl:'Para sa buntis', desc:'Prenatal visits with blood pressure and weight monitoring. Bring your MCH booklet.', avg:15, limit:20, cutoff:'', open:true, note:'', startedOn:'' }
+  ];
+  const doctors = [
+    { id:'d1', name:'Dr. Maria Luisa Santos', role:'Barangay Health Physician · General Medicine', days:[1,2,3,4,5], start:'08:00', end:'12:00', available:true, limit:30, note:'' },
+    { id:'d2', name:'Dr. Ramon C. Villanueva', role:'Family Medicine', days:[1,3,5], start:'13:00', end:'17:00', available:true, limit:25, note:'' },
+    { id:'d3', name:'Dr. Angelica P. Reyes', role:'Pediatrics', days:[2,4], start:'09:00', end:'15:00', available:true, limit:20, note:'' },
+    { id:'d4', name:'Dr. Jose Emmanuel Cruz', role:'Dentist', days:[2,5], start:'08:00', end:'12:00', available:false, limit:15, note:'On leave this week' },
+    { id:'d5', name:'Kristine Dela Paz, RN', role:'Public Health Nurse · Immunization', days:[1,2,3,4,5], start:'08:00', end:'17:00', available:true, limit:60, note:'' },
+    { id:'d6', name:'Rosario Mendoza, RM', role:'Midwife · Prenatal care', days:[1,2,4], start:'08:00', end:'15:00', available:true, limit:20, note:'' }
+  ];
+  const medRows = [
+    ['Paracetamol 500 mg','Tablet',1200,300],['Amoxicillin 500 mg','Capsule',180,200],['Cetirizine 10 mg','Tablet',450,150],
+    ['Losartan 50 mg','Tablet',90,250],['Amlodipine 5 mg','Tablet',640,250],['Metformin 500 mg','Tablet',0,200],
+    ['Salbutamol 2.5 mg/2.5 mL','Nebule',60,50],['Oral Rehydration Salts (ORS)','Sachet',320,100],['Zinc Sulfate 20 mg/5 mL','Syrup',0,30],
+    ['Ferrous Sulfate + Folic Acid','Tablet',800,300],['Vitamin A 200,000 IU','Capsule',150,100],['Mefenamic Acid 500 mg','Capsule',260,150],
+    ['Cotrimoxazole 800/160 mg','Tablet',120,100],['Carbocisteine 500 mg','Capsule',75,100],['Ascorbic Acid 500 mg','Tablet',900,200],
+    ['Ambroxol 15 mg/5 mL','Syrup',40,30],['Metronidazole 500 mg','Tablet',210,100],['Simvastatin 20 mg','Tablet',380,150],
+    ['Hydrochlorothiazide 25 mg','Tablet',0,100],['Ibuprofen 400 mg','Tablet',340,150],['Loperamide 2 mg','Capsule',95,50],
+    ['Lagundi 600 mg (Vitex negundo)','Tablet',500,150],['Sambong 500 mg (Blumea balsamifera)','Tablet',130,150],
+    ['Anti-Rabies Vaccine (PVRV)','Vial',18,20],['Tetanus Toxoid','Vial',40,20],['Measles-Rubella Vaccine','Vial',25,15]
+  ];
+  const medicines = medRows.map(([name,form,stock,thr]) => ({ id:uid(), name, form, stock, thr, status:medStatusFor(stock,thr), updated:T }));
+
+  const names = ['Lorna Bautista','Ramil Aquino','Cristina Mendoza','Eduardo Ramos','Josefina Garcia','Mark Anthony Villanueva','Rosalinda Torres','Jerome Castillo','Liza Fernandez','Danilo Navarro','Maricel Flores','Arnel Pascual','Teresita Lopez','Kevin Soriano','Grace Morales','Ronaldo Santiago','Jennifer Ocampo','Benjie Salazar','Imelda Cortez','Paolo Domingo','Aileen Mercado','Rodel Valdez'];
+  const tickets = [];
+  const endMin = Math.min(n.min - 4, 16*60 + 40);
+  if (center.days.includes(n.dow) && endMin > 486) {
+    let t = 481, i = 0;
+    const counters = {};
+    while (t < endMin && i < 22) {
+      const r = rnd();
+      const svc = r < .45 ? 'CU' : r < .65 ? 'AR' : r < .85 ? 'VX' : 'PN';
+      let prio = 'regular';
+      const pr = rnd();
+      if (svc === 'PN') prio = 'pregnant';
+      else if (pr < .22) prio = 'senior'; else if (pr < .3) prio = 'pwd';
+      const lane = prio === 'regular' ? 'R' : 'P';
+      const ck = svc + lane; counters[ck] = (counters[ck]||0) + 1;
+      tickets.push({ id:uid(), date:T, svc, prio, num:`${svc}-${lane==='P'?'P':''}${pad(counters[ck])}`, name:names[i % names.length], age:prio==='senior'?60+Math.floor(rnd()*20):18+Math.floor(rnd()*40), contact:'09' + String(Math.floor(100000000 + rnd()*899999999)), address:['Purok 1','Purok 2','Purok 3','Purok 4','Purok 5'][Math.floor(rnd()*5)], code:vcode(rnd), cmin:t, status:'waiting', confirmed:false, calledMin:null, doneMin:null, val: prio==='regular' ? null : { status:'approved', proof:PROOFS[prio][0], idNo:'', photo:'', start:tsFor(T, t+1), end:tsFor(T, t+1) + Math.round((VAL_MIN + rnd()*(VAL_MAX-VAL_MIN+0.6))*60000) } });
+      t += (t < 600 ? 4 : 9) + Math.floor(rnd()*(t < 600 ? 7 : 14));
+      i++;
+    }
+    // simulate each service's queue so seeded statuses match the clock
+    services.forEach(s => {
+      const list = tickets.filter(x => x.svc === s.code).sort((a,b)=>a.cmin-b.cmin);
+      let free = 480, servingSet = false;
+      list.forEach(x => {
+        const call = Math.max(free, x.cmin + (x.val ? 6 : 3));
+        const done = call + Math.round(s.avg * (0.7 + rnd()*0.6));
+        if (done <= n.min) { x.status='served'; x.calledMin=call; x.doneMin=done; x.confirmed=true; free = done; }
+        else if (call <= n.min && !servingSet) { x.status='serving'; x.calledMin=call; x.confirmed=true; servingSet = true; free = done; }
+        else { x.status='waiting'; x.confirmed = rnd() < .5; free = Math.max(free, done); }
+      });
+      if (list.length) s.startedOn = T;
+    });
+    const served = tickets.filter(x => x.status === 'served');
+    if (served.length > 4) { const x = served[2]; x.status='noshow'; x.doneMin=null; x.confirmed=false; }
+    // priority tickets still waiting have not shown their ID yet
+    tickets.forEach(x => { if (x.val && x.status === 'waiting') { x.val.status = 'pending'; x.val.start = null; x.val.end = null; } });
+  }
+  // during clinic hours, add two priority patients at the validation desk so the flow is visible
+  if (center.days.includes(n.dow) && n.min >= 510 && n.min < 16*60 + 30) {
+    [['Felicidad Ramos',72,'senior','CU'],['Jonathan Reyes',34,'pwd','AR']].forEach(([nm,age,prio,svc],k) => {
+      const c = tickets.filter(x => x.svc===svc && x.prio!=='regular').length + 1;
+      tickets.push({ id:uid(), date:T, svc, prio, num:`${svc}-P${pad(c)}`, name:nm, age, contact:'0917' + (5550100 + k*37), address:k?'Purok 4':'Purok 2', code:vcode(rnd), cmin:n.min - 4 + k*2, status:'waiting', confirmed:false, calledMin:null, doneMin:null,
+        val:{ status:k ? 'pending' : 'checking', proof:PROOFS[prio][0], idNo:k ? '' : 'OSCA-QC-5-018342', photo:'', start:k ? null : Date.now() - 95000, end:null } });
+    });
+  }
+  const turned = {}; if (tickets.length > 6) turned[T] = 2;
+
+  // previous operating days (sample history for reports)
+  const history = []; let back = 1;
+  while (history.length < 6 && back < 14) {
+    const d = addDays(T, -back); back++;
+    if (!center.days.includes(dowOf(d))) continue;
+    const hours = [16,19,13,9,6,8,7,5,2].map(v => Math.max(0, Math.round(v * (0.75 + rnd()*0.5))));
+    const appts = hours.reduce((a,b)=>a+b,0);
+    const turnedAway = 3 + Math.floor(rnd()*11), noshow = 2 + Math.floor(rnd()*4), cancelled = Math.floor(rnd()*3);
+    history.push({ date:d, appts, turned:turnedAway, noshow, cancelled, served:appts - noshow - cancelled, hours, avgWait: 18 + Math.floor(rnd()*22) });
+  }
+  history.reverse();
+
+  const closures = [
+    { id:uid(), date:'2026-11-02', reason:"All Souls' Day (special non-working day)" },
+    { id:uid(), date:'2026-11-30', reason:'Bonifacio Day (regular holiday)' },
+    { id:uid(), date:'2026-12-08', reason:'Feast of the Immaculate Conception (special non-working day)' }
+  ];
+  const announcements = [
+    { id:uid(), type:'leave', title:'Dental services unavailable this week', body:'Dr. Jose Emmanuel Cruz is on leave. Tooth extraction and dental check-ups resume next week. For dental emergencies, please proceed to the nearest district health center.', date:T, pinned:true },
+    { id:uid(), type:'cutoff', title:'Service cut-off times are lifted for now', body:'You can get a queue number for any service at any time, as long as daily slots are still available. Anti-rabies is limited to 25 patients per day, so come early and bring your animal bite record card.', date:addDays(T,-1), pinned:false },
+    { id:uid(), type:'schedule', title:"Closed on November 2 (All Souls' Day)", body:'The health center will be closed. Regular operations resume on Tuesday, November 3, 8:00 AM.', date:addDays(T,-2), pinned:false },
+    { id:uid(), type:'general', title:'Free flu vaccine for senior citizens', body:'Senior citizens of Barangay Kaligayahan may get a free flu vaccine while supplies last. Choose the Vaccination service and select the Priority lane. Bring your Senior Citizen ID.', date:addDays(T,-4), pinned:false }
+  ];
+  return { v:1, cutoffOpen:true, hoursOpen:true, created:T, center, services, doctors, medicines, tickets, turned, history, closures, announcements };
+}
+function vcode(r){ const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let s=''; for (let i=0;i<5;i++) s += A[Math.floor((r?r():Math.random())*A.length)]; return 'KLG-' + s; }
+
+/* ---------- state ---------- */
+let S;
+function load(){
+  try { const raw = ls.get(KEY); if (raw) { const o = JSON.parse(raw); if (o && o.v === 1) { S = o; migrate(); return; } } } catch(e){}
+  S = seed(); save();
+}
+function migrate(){
+  if (!S.hoursOpen) {
+    S.center.alwaysOpen = true; S.hoursOpen = true;
+    S.announcements.forEach(a => { a.body = a.body.replace('You can get a queue number for any service until the health center closes at 5:00 PM, as long as daily slots are still available.', 'You can get a queue number for any service at any time, as long as daily slots are still available.'); });
+    save();
+  }
+  if (S.cutoffOpen) return;
+  S.services.forEach(s => s.cutoff = '');
+  const a = S.announcements.find(x => /^Anti-rabies cut-off/.test(x.title));
+  if (a) { a.title = 'Service cut-off times are lifted for now'; a.body = 'You can get a queue number for any service at any time, as long as daily slots are still available. Anti-rabies is limited to 25 patients per day, so come early and bring your animal bite record card.'; }
+  S.cutoffOpen = true; save();
+}
+function save(){ ls.set(KEY, JSON.stringify(S)); }
+function commit(msg){ save(); render(); if (msg) toast(msg); }
+function myTickets(){ try { return JSON.parse(ls.get(TKEY) || '[]'); } catch(e){ return []; } }
+function addMyTicket(id){ const a = myTickets(); a.push(id); ls.set(TKEY, JSON.stringify(a.slice(-20))); memMine.push(id); }
+const memMine = [];
+function mineToday(){
+  const ids = new Set([...myTickets(), ...memMine]); const T = now().date;
+  return S.tickets.filter(t => ids.has(t.id) && t.date === T).sort((a,b)=>b.cmin-a.cmin);
+}
+
+/* ---------- derived ---------- */
+const svcBy = code => S.services.find(s => s.code === code);
+const todayTickets = () => { const T = now().date; return S.tickets.filter(t => t.date === T); };
+function callOrderAt(list){
+  return list.slice().sort((a,b) => { const pa = a.prio==='regular'?1:0, pb = b.prio==='regular'?1:0; return pa-pb || a.cmin-b.cmin || a.num.localeCompare(b.num); });
+}
+function waitingFor(code){ return callOrderAt(todayTickets().filter(t => t.svc===code && t.status==='waiting' && isValidated(t))); }
+function pendingValidation(){ return todayTickets().filter(t => t.status==='waiting' && !isValidated(t) && t.val.status!=='rejected').sort((a,b) => (a.val.status==='checking'?0:1)-(b.val.status==='checking'?0:1) || a.cmin-b.cmin); }
+// full waiting line for a service: validated patients in call order, then priority patients still waiting for ID validation
+function lineFor(code){ return [...waitingFor(code), ...pendingValidation().filter(t => t.svc === code)]; }
+function nextFor(code){ return lineFor(code)[0] || null; }
+function servingFor(code){ return todayTickets().find(t => t.svc===code && t.status==='serving') || null; }
+function lastCalled(code){ return todayTickets().filter(t => t.svc===code && t.calledMin!=null).sort((a,b)=>b.calledMin-a.calledMin)[0] || null; }
+function closureOn(ds){ return S.closures.find(c => c.date === ds); }
+function centerStatus(){
+  const n = now(), c = S.center, cl = closureOn(n.date);
+  if (c.force === 'closed') return { open:false, reason:c.forceNote || 'Temporarily closed by the health center' };
+  if (c.force === 'open') return { open:true, reason:c.forceNote || 'Open (manual override by staff)' };
+  if (cl) return { open:false, reason:'Closed today: ' + cl.reason };
+  if (c.alwaysOpen) return { open:true, reason:'Open anytime' };
+  if (!c.days.includes(n.dow)) return { open:false, reason:'No clinic today. Opens ' + nextOpen() };
+  if (n.min < toMin(c.open)) return { open:false, reason:'Opens today at ' + fmtT(c.open) };
+  if (n.min >= toMin(c.close)) return { open:false, reason:'Closed for the day. Opens ' + nextOpen() };
+  return { open:true, reason:'Closes at ' + fmtT(S.center.close) + ' today' };
+}
+function nextOpen(){
+  const n = now();
+  for (let i = 1; i < 21; i++) {
+    const d = addDays(n.date, i);
+    if (S.center.days.includes(dowOf(d)) && !closureOn(d)) return (i===1?'tomorrow':dateShort(d)) + ', ' + fmtT(S.center.open);
+  }
+  return 'soon';
+}
+const queueOpen = () => S.center.demo || centerStatus().open;
+const siteLocked = () => S.center.outside === 'site' && !queueOpen();
+function serviceState(s){
+  const n = now(), count = todayTickets().filter(t => t.svc===s.code && t.status!=='cancelled').length;
+  const left = Math.max(0, s.limit - count);
+  if (!s.open) return { ok:false, k:'crit', t:'Not available today', left, count };
+  if (left <= 0) return { ok:false, k:'crit', t:'Full for today', left, count };
+  if (!S.center.demo && s.cutoff && n.min >= toMin(s.cutoff)) return { ok:false, k:'warn', t:'Cut-off reached', left, count };
+  return { ok:true, k:'ok', t:'Accepting patients', left, count };
+}
+function docState(d){
+  const n = now(), cl = closureOn(n.date);
+  if (!d.available) return { k:'crit', t:'Unavailable', sub:d.note || 'Not available today', duty:false };
+  if (!d.days.includes(n.dow) || cl) return { k:'neutral', t:'Not on duty today', sub:'Next duty: ' + nextDuty(d), duty:false };
+  if (n.min < toMin(d.start)) return { k:'info', t:'On duty later', sub:`Starts at ${fmtT(d.start)}`, duty:true };
+  if (n.min >= toMin(d.end)) return { k:'neutral', t:'Duty ended', sub:`Was on duty ${fmtT(d.start)} – ${fmtT(d.end)}`, duty:true };
+  return { k:'ok', t:'Available now', sub:`Until ${fmtT(d.end)}`, duty:true };
+}
+function nextDuty(d){
+  const n = now();
+  for (let i = 1; i < 15; i++) { const ds = addDays(n.date,i); if (d.days.includes(dowOf(ds)) && !closureOn(ds)) return DOW_LONG[dowOf(ds)] + ', ' + fmtT(d.start); }
+  return '—';
+}
+function aheadOf(t){
+  if (t.status !== 'waiting') return 0;
+  if (!isValidated(t)) return waitingFor(t.svc).filter(x => x.prio !== 'regular').length;
+  return waitingFor(t.svc).findIndex(x => x.id === t.id);
+}
+function estWait(t){
+  const s = svcBy(t.svc); const a = aheadOf(t); const sv = servingFor(t.svc) ? 0.5 : 0;
+  return Math.round((a + sv) * s.avg + (isValidated(t) ? 0 : VAL_MAX));
+}
+const cutLabel = s => s.cutoff ? fmtT(s.cutoff) : 'Open';
+const hoursLabel = () => S.center.alwaysOpen ? 'Open anytime' : `${fmtT(S.center.open)} – ${fmtT(S.center.close)}, ${daysLabel(S.center.days)}`;
+const daysLabel = days => { const order=[1,2,3,4,5,6,0]; return order.filter(d=>days.includes(d)).map(d=>DOW[d]).join(', ') || 'No days set'; };
+
+/* ---------- icons ---------- */
+const I = {
+  status:'<path d="M6 42h36M10 42V18l14-9 14 9v24"/><path d="M21 23h6M24 20v6"/><path d="M20 42v-8h8v8"/>',
+  doctor:'<path d="M13 6h-2v10a9 9 0 0 0 18 0V6h-2"/><path d="M20 25v5a9 9 0 0 0 18 0v-5"/><circle cx="38" cy="21" r="4"/>',
+  medicine:'<path d="M8.5 29.5 21 17a7.1 7.1 0 0 1 10 10L18.5 39.5a7.1 7.1 0 0 1-10-10z"/><path d="M14.8 23.2l10 10"/><circle cx="36" cy="10.5" r="5.5"/><path d="M32.1 14.4l7.8-7.8"/>',
+  queue:'<path d="M6 14h36v6a4 4 0 0 0 0 8v6H6v-6a4 4 0 0 0 0-8z"/><path d="M17 14v20" stroke-dasharray="2.5 3"/><path d="M23 21h12M23 27h8"/>',
+  announce:'<path d="M8 20v8h6l15 8V12l-15 8z"/><path d="M14 28l2.5 10h5L19 29"/><path d="M35 19a7 7 0 0 1 0 10M39 15a12 12 0 0 1 0 18"/>',
+  receipt:'<path d="M12 5h24v38l-4-3-4 3-4-3-4 3-4-3-4 3z"/><path d="M18 14h12M18 20h12M18 26h7"/>',
+  dash:'<rect x="6" y="6" width="15" height="15" rx="2"/><rect x="27" y="6" width="15" height="9" rx="2"/><rect x="27" y="21" width="15" height="21" rx="2"/><rect x="6" y="27" width="15" height="15" rx="2"/>',
+  cal:'<rect x="6" y="10" width="36" height="32" rx="3"/><path d="M6 19h36M16 5v9M32 5v9"/><path d="M17 30l5 5 9-9"/>',
+  clock:'<circle cx="24" cy="24" r="18"/><path d="M24 13v11l7 5"/>',
+  chart:'<path d="M6 42h36"/><path d="M12 36V24M21 36V14M30 36V20M39 36V9"/>',
+  search:'<circle cx="21" cy="21" r="12"/><path d="M30 30l11 11"/>',
+  info:'<circle cx="24" cy="24" r="18"/><path d="M24 22v11M24 15v1"/>',
+  back:'<path d="M28 12L16 24l12 12"/>',
+  idcard:'<rect x="5" y="10" width="38" height="28" rx="3"/><circle cx="17" cy="21" r="4"/><path d="M10 32c1.2-3.6 4-5 7-5s5.8 1.4 7 5M29 19h9M29 25h9M29 31h5"/>'
+};
+const icon = (k, cls='', sw=2.2) => `<svg class="${cls}" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[k]}</svg>`;
+const backBtn = (to='home', label='Back to home') => `<button class="back" data-act="go" data-to="${to}" type="button">${icon('back','',4).replace('<svg ','<svg width="16" height="16" ')}${label}</button>`;
+
+/* =========================================================
+   RESIDENT VIEWS
+   ========================================================= */
+let flow = { step:1, prio:null, svc:null, err:'' };
+let medQ = '', medF = 'all';
+let viewTicketId = null;
+let flowPhoto = '';
+
+function renderStrip(){
+  const cs = centerStatus(), c = S.center;
+  const q = queueOpen();
+  $('#strip').innerHTML = `<div class="wrap">
+    <span><span class="dot" style="background:${cs.open?'#6BE3A4':'#FF8A7F'}"></span><strong>${cs.open?'OPEN':'CLOSED'}</strong> · ${esc(cs.reason)}</span>
+    ${c.alwaysOpen ? '' : `<span>Hours: ${hoursLabel()}</span>`}
+    <span>Online queueing: <strong>${q ? 'available' : 'closed'}</strong>${S.center.demo ? ' (demo mode)' : ''}</span>
+  </div>`;
+  const fh = $('#footHours'); if (fh) fh.textContent = `Operating hours: ${hoursLabel()}`;
+}
+function tickClock(){
+  const n = now();
+  document.querySelectorAll('[data-since]').forEach(el => { const ms = Date.now() - (+el.dataset.since); el.textContent = fmtDur(ms); el.classList.toggle('over', ms > VAL_MAX*60000);
+    const bar = el.closest('.vcard')?.querySelector('.tbar i'); if (bar) { bar.style.width = Math.min(100, ms/(VAL_MAX*60000)*100) + '%'; bar.style.background = ms > VAL_MAX*60000 ? 'var(--crit)' : ms > VAL_MIN*60000 ? 'var(--warn)' : 'var(--ok)'; } });
+  $('#clock').innerHTML = `<span>${DOW[n.dow]} ${MON[+n.date.slice(5,7)-1]} ${+n.date.slice(8)}</span><span>${fmt(n.min).replace(' ', ':' + pad(n.s) + ' ')}</span>`;
+}
+
+function servingBoard(){
+  return `<aside class="serving-board" aria-label="Next in line">
+    <div class="eyebrow">Next in line · Susunod sa pila</div>
+    ${S.services.map(s => { const line = lineFor(s.code); const nx = line[0]; const more = line.slice(1, 4);
+      return `<div class="sb-row"><span>${esc(s.name)}<small class="sb-sub">${line.length ? `${line.length} waiting${more.length ? ' · then ' + more.map(t => esc(t.num)).join(', ') + (line.length > 4 ? '…' : '') : ''}` : 'No one in line'}</small></span>${nx ? `<b>${esc(nx.num)}</b>` : `<b class="idle">—</b>`}</div>`; }).join('')}
+    <span class="small" style="opacity:.75">${todayTickets().filter(t=>t.status==='waiting').length} patients waiting across all services</span>
+  </aside>`;
+}
+
+function viewLocked(){
+  const cs = centerStatus();
+  return `<section class="card" style="max-width:640px;margin:24px auto;text-align:center;padding:32px 24px">
+    <div style="color:var(--primary);display:flex;justify-content:center">${icon('clock','',2).replace('<svg ','<svg width="64" height="64" ')}</div>
+    <h1 style="margin:12px 0 8px">The online system is available during clinic hours</h1>
+    <p class="muted">${esc(cs.reason)}. You can use this website from ${fmtT(S.center.open)} to ${fmtT(S.center.close)}, ${daysLabel(S.center.days)}.</p>
+  </section>
+  <section class="card" style="max-width:640px;margin:0 auto"><div class="card-head"><h2>Announcements</h2></div>${annList(3)}</section>`;
+}
+
+function viewHome(){
+  const cs = centerStatus(), n = now();
+  const onDuty = S.doctors.filter(d => docState(d).duty).length;
+  const waiting = todayTickets().filter(t => t.status==='waiting').length;
+  const outMeds = S.medicines.filter(m => m.status==='out').length;
+  const upcoming = S.closures.filter(c => c.date >= n.date).sort((a,b)=>a.date.localeCompare(b.date))[0];
+  const mine = mineToday().filter(t => ['waiting','serving','skipped'].includes(t.status))[0];
+  const annTop = S.announcements.slice().sort((a,b)=>(b.pinned-a.pinned)||b.date.localeCompare(a.date))[0];
+  const tiles = [
+    ['status','status','Health Center Status','Bukas ba ngayon?', cs.open ? pill('ok','Open') : pill('crit','Closed')],
+    ['doctors','doctor','Doctor Availability','Sino ang doktor ngayon', pill('info', onDuty + ' on duty', true)],
+    ['medicines','medicine','Medicine Availability','Available na gamot', outMeds ? pill('crit', outMeds + ' out', true) : ''],
+    ['queue','queue','Get a Queue Number','Pumila online', queueOpen() ? '' : pill('neutral','Closed',true)],
+    ['announcements','announce','Announcements','Mga paalala', ''],
+    ['ticket','receipt','My Queue Ticket','Tingnan ang numero', mine ? pill('ok', mine.num, true) : '']
+  ];
+  return `
+  <section class="hero">
+    <div class="hero-main">
+      <div class="eyebrow">${esc(dateLong(n.date))}</div>
+      <h1>Check the health center before you go</h1>
+      <div class="status-big">
+        <span class="status-badge ${cs.open?'ok':'crit'}">${cs.open?'OPEN NOW':'CLOSED'}</span>
+        <span class="muted">${esc(cs.reason)}</span>
+      </div>
+      <div class="hero-meta">
+        <div><b>${onDuty}/${S.doctors.length}</b><span>Doctors &amp; staff on duty today</span></div>
+        <div><b>${waiting}</b><span>Patients waiting in queue</span></div>
+        <div><b>${outMeds}</b><span>Medicines out of stock</span></div>
+        <div><b>${upcoming ? esc(dateShort(upcoming.date).replace(/^\w+, /,'')) : '—'}</b><span>Next holiday closure</span></div>
+      </div>
+      ${mine ? `<div class="notice ok">${icon('receipt')}<div><b>Your ticket ${esc(mine.num)}</b> · ${mine.status==='serving' ? 'It is your turn. Please proceed to the triage desk.' : mine.status==='skipped' ? 'You were called but not present. Go to the triage desk.' : `${aheadOf(mine)} ahead of you, about ${estWait(mine)} min.`} <a href="#ticket" data-act="go" data-to="ticket">View ticket</a></div></div>` : ''}
+    </div>
+    ${servingBoard()}
+  </section>
+  <section aria-labelledby="svcH" style="margin-bottom:26px">
+    <div class="page-head"><div><div class="eyebrow">Online services</div><h2 id="svcH">What do you need today?</h2></div></div>
+    <div class="tiles">
+      ${tiles.map(([to,ic,t,sub,p]) => `<button class="tile" type="button" data-act="go" data-to="${to}">${p}${icon(ic,'',1.9)}<b>${t}</b><small>${sub}</small></button>`).join('')}
+    </div>
+  </section>
+  ${annTop ? `<section class="card"><div class="card-head"><h2>Latest announcement</h2><button class="btn ghost sm" data-act="go" data-to="announcements" type="button">See all</button></div>${annItem(annTop)}</section>` : ''}`;
+}
+
+function viewStatus(){
+  const cs = centerStatus(), c = S.center, n = now();
+  const order = [1,2,3,4,5,6,0];
+  const up = S.closures.filter(x => x.date >= n.date).sort((a,b)=>a.date.localeCompare(b.date));
+  return `${backBtn()}
+  <div class="page-head"><div><div class="eyebrow">Health center status</div><h1>Is the health center open?</h1></div></div>
+  <div class="grid-2">
+    <section class="card">
+      <div class="status-big" style="margin-bottom:10px"><span class="status-badge ${cs.open?'ok':'crit'}">${cs.open?'OPEN NOW':'CLOSED'}</span></div>
+      <p style="margin-bottom:14px">${esc(cs.reason)}.</p>
+      <div class="table-wrap"><table><thead><tr><th>Day</th><th>Hours</th></tr></thead><tbody>
+        ${order.map(d => `<tr${d===n.dow?' style="font-weight:700"':''}><td>${DOW_LONG[d]}${d===n.dow?' <span class="pill info plain">Today</span>':''}</td><td class="num">${c.alwaysOpen ? 'Open anytime' : c.days.includes(d) ? `${fmtT(c.open)} – ${fmtT(c.close)}` : '<span class="muted">Closed</span>'}</td></tr>`).join('')}
+      </tbody></table></div>
+    </section>
+    <div class="stack">
+      <section class="card"><div class="card-head"><h2>Service cut-off today</h2></div>
+        <div class="table-wrap"><table><thead><tr><th>Service</th><th>Cut-off</th><th>Slots left</th></tr></thead><tbody>
+        ${S.services.map(s => { const st = serviceState(s); return `<tr><td>${esc(s.name)}<span class="sub">${pill(st.k,st.t)}</span></td><td class="num">${cutLabel(s)}</td><td class="num">${st.left} of ${s.limit}</td></tr>`; }).join('')}
+        </tbody></table></div>
+      </section>
+      <section class="card"><div class="card-head"><h2>Upcoming closures</h2></div>
+        ${up.length ? `<div class="list">${up.map(x => `<div><b>${esc(dateLong(x.date))}</b><p class="muted small">${esc(x.reason)}</p></div>`).join('')}</div>` : '<p class="muted">No scheduled closures.</p>'}
+      </section>
+    </div>
+  </div>`;
+}
+
+function viewDoctors(){
+  const n = now();
+  const list = S.doctors.slice().sort((a,b) => { const r = {ok:0,info:1,neutral:2,crit:3}; return r[docState(a).k]-r[docState(b).k]; });
+  return `${backBtn()}
+  <div class="page-head"><div><div class="eyebrow">Doctor availability · updated daily</div><h1>Who is on duty today?</h1><p>${esc(dateLong(n.date))}. Schedules may change; check announcements for leaves.</p></div></div>
+  <div class="doc-grid">
+    ${list.map(d => { const st = docState(d); const ini = d.name.replace(/^(Dr\.|Nurse)\s*/,'').split(/\s+/).filter(w=>/^[A-Z]/.test(w)).slice(0,2).map(w=>w[0]).join('');
+      return `<article class="card doc">
+        <div class="avatar">${esc(ini)}</div>
+        <div class="meta">
+          <div><h3>${esc(d.name)}</h3><span class="muted small">${esc(d.role)}</span></div>
+          <div>${pill(st.k, st.t)}</div>
+          <div class="small"><b class="num">${fmtT(d.start)} – ${fmtT(d.end)}</b> <span class="muted">· ${esc(st.sub)}</span></div>
+          <div class="days" aria-label="Duty days">${[1,2,3,4,5,6].map(x => `<span class="${d.days.includes(x)?'on':''} ${x===n.dow?'today':''}">${DOW[x]}</span>`).join('')}</div>
+          <span class="muted small">Up to ${d.limit} consultations per day</span>
+        </div>
+      </article>`; }).join('')}
+  </div>`;
+}
+
+function medRowsHtml(admin){
+  const q = medQ.trim().toLowerCase();
+  const list = S.medicines.filter(m => (medF==='all' || m.status===medF) && (!q || m.name.toLowerCase().includes(q) || m.form.toLowerCase().includes(q)))
+    .sort((a,b) => a.name.localeCompare(b.name));
+  if (!list.length) return `<tr><td colspan="${admin?6:3}" class="empty">No medicine matches “${esc(medQ)}”. Check the spelling or try the generic name.</td></tr>`;
+  let last = '';
+  return list.map(m => {
+    const L = m.name[0].toUpperCase(); const head = !admin && L !== last ? `<tr class="letter-row"><td colspan="3">${L}</td></tr>` : ''; last = L;
+    const [k,t] = MED_ST[m.status];
+    if (!admin) return head + `<tr><td><b>${esc(m.name)}</b></td><td>${esc(m.form)}</td><td>${pill(k,t)}</td></tr>`;
+    return `<tr><td><b>${esc(m.name)}</b><span class="sub">${esc(m.form)} · updated ${esc(dateShort(m.updated))}</span></td>
+      <td><div class="btn-row" style="flex-wrap:nowrap"><input class="inline-num" type="number" min="0" id="stock-${m.id}" value="${m.stock}" aria-label="Stock of ${esc(m.name)}"><button class="btn ghost sm" data-act="medStock" data-id="${m.id}" type="button">Update</button></div></td>
+      <td class="num">${m.thr}</td>
+      <td>${pill(k,t)}</td>
+      <td><select id="mst-${m.id}" data-change="medStatus" data-id="${m.id}" aria-label="Status of ${esc(m.name)}">
+        ${Object.entries(MED_ST).map(([v,[,lbl]]) => `<option value="${v}"${v===m.status?' selected':''}>${lbl}</option>`).join('')}</select></td>
+      <td><button class="btn danger sm" data-act="medDel" data-id="${m.id}" data-confirm="Remove?" type="button">Remove</button></td></tr>`;
+  }).join('');
+}
+function medToolbar(){
+  const c = s => S.medicines.filter(m => s==='all' || m.status===s).length;
+  return `<div class="toolbar">
+    <label class="search">${icon('search','',3.5).replace('<svg ','<svg width="18" height="18" ')}<input type="text" id="medSearch" placeholder="Search medicine, e.g. paracetamol" value="${esc(medQ)}" autocomplete="off" aria-label="Search medicine"></label>
+    <div class="chips" role="group" aria-label="Filter by status">
+      ${[['all','All'],['available','Available'],['low','Low stock'],['out','Out of stock']].map(([v,l]) => `<button class="chip" type="button" data-act="medFilter" data-v="${v}" aria-pressed="${medF===v}">${l} <span class="num">${c(v)}</span></button>`).join('')}
+    </div></div>`;
+}
+function viewMedicines(){
+  return `${backBtn()}
+  <div class="page-head"><div><div class="eyebrow">Medicine availability</div><h1>Is my medicine available?</h1><p>Free medicines are given with a prescription from the health center doctor. Stock is updated by the pharmacy staff.</p></div></div>
+  ${medToolbar()}
+  <div class="table-wrap"><table><thead><tr><th>Medicine</th><th>Form</th><th>Status</th></tr></thead><tbody id="medBody">${medRowsHtml(false)}</tbody></table></div>`;
+}
+
+function annItem(a){
+  const [k,t] = ANN_T[a.type] || ANN_T.general; const [y,m,d] = ymd(a.date);
+  return `<article class="ann"><div class="ann-date" aria-hidden="true"><span>${MON[m-1]}</span><b>${d}</b></div>
+    <div><div class="btn-row">${pill(k,t)}${a.pinned?pill('neutral','Pinned',true):''}</div><h3>${esc(a.title)}</h3><p>${esc(a.body)}</p></div></article>`;
+}
+function annList(limit){
+  const list = S.announcements.slice().sort((a,b)=>(b.pinned-a.pinned)||b.date.localeCompare(a.date)).slice(0, limit || 999);
+  return list.length ? `<div class="list">${list.map(annItem).join('')}</div>` : '<p class="muted">No announcements right now.</p>';
+}
+function viewAnnouncements(){
+  const n = now(); const up = S.closures.filter(x => x.date >= n.date).sort((a,b)=>a.date.localeCompare(b.date));
+  return `${backBtn()}
+  <div class="page-head"><div><div class="eyebrow">Announcements</div><h1>News from the health center</h1><p>Doctor leaves, holiday schedules and service cut-offs are posted here.</p></div></div>
+  <div class="grid-2">
+    <section class="card" style="grid-column:1/-1">${annList()}</section>
+    <section class="card"><div class="card-head"><h2>Holiday &amp; closure schedule</h2></div>
+      ${up.length ? `<div class="list">${up.map(x => `<div><b>${esc(dateLong(x.date))}</b><p class="muted small">${esc(x.reason)}</p></div>`).join('')}</div>` : '<p class="muted">No scheduled closures.</p>'}</section>
+    <section class="card"><div class="card-head"><h2>Daily service cut-off</h2></div>
+      <div class="list">${S.services.map(s => { const st = serviceState(s); return `<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><div><b>${esc(s.name)}</b><p class="muted small">Cut-off: ${cutLabel(s)} · max ${s.limit} patients</p></div>${pill(st.k,st.t)}</div>`; }).join('')}</div></section>
+  </div>`;
+}
+
+/* ---------- queue flow ---------- */
+function viewQueue(){
+  const cs = centerStatus();
+  const head = `${backBtn()}<div class="page-head"><div><div class="eyebrow">Queueing · same-day only</div><h1>Get a queue number</h1><p>Queue numbers are for today, ${esc(dateLong(now().date))}, only. Each service has its own line, and priority patients have a separate lane.</p></div></div>`;
+  if (!queueOpen()) {
+    return head + `<div class="grid-2"><section class="card"><div class="notice crit">${icon('clock')}<div><b>Online queueing is closed.</b><br>${esc(cs.reason)}. Queue numbers can be taken from ${fmtT(S.center.open)} to ${fmtT(S.center.close)}, ${daysLabel(S.center.days)}.</div></div></section>${servingBoard()}</div>`;
+  }
+  const mine = mineToday().filter(t => t.status==='waiting' || t.status==='serving')[0];
+  const steps = ['Patient type','Service','Your details'];
+  let body = '';
+  if (flow.step === 1) {
+    body = `<h2 style="margin-bottom:12px">Are you a priority patient?</h2>
+    <div class="choice-grid" style="margin-bottom:16px">
+      <button class="choice" type="button" data-act="pickLane" data-v="priority" aria-pressed="${flow.lane==='priority'}"><span class="pill prio plain" style="align-self:flex-start">Priority lane</span><b>Priority patient</b><span class="muted small">Senior citizens, persons with disability, and pregnant women are served first.</span></button>
+      <button class="choice" type="button" data-act="pickPrio" data-v="regular" aria-pressed="${flow.prio==='regular'}"><span class="pill neutral plain" style="align-self:flex-start">Regular lane</span><b>Regular patient</b><span class="muted small">All other residents. Served in order of arrival.</span></button>
+    </div>
+    ${flow.lane==='priority' ? `<h3 style="margin-bottom:10px">Which applies to you?</h3>
+    <div class="choice-grid">${['senior','pwd','pregnant'].map(v => `<button class="choice" type="button" data-act="pickPrio" data-v="${v}" aria-pressed="${flow.prio===v}"><b>${PRIO[v]}</b><span class="muted small">${v==='senior'?'60 years old and above. Bring your Senior Citizen ID.':v==='pwd'?'Bring your PWD ID for verification.':'Bring your MCH booklet or prenatal record.'}</span></button>`).join('')}</div>
+    ${validationNotice()}` : ''}`;
+  } else if (flow.step === 2) {
+    body = `<h2 style="margin-bottom:4px">Choose a service</h2><p class="muted" style="margin-bottom:14px">Lane: <b>${PRIO[flow.prio]}</b> · <button class="back" style="margin:0;display:inline" data-act="flowStep" data-v="1" type="button">change</button></p>
+    <div class="choice-grid">${S.services.map(s => { const st = serviceState(s); const nx = nextFor(s.code); const w = lineFor(s.code).length;
+      return `<button class="choice" type="button" data-act="pickSvc" data-v="${s.code}" aria-pressed="${flow.svc===s.code}" ${st.ok?'':'aria-disabled="true" style="opacity:.6"'}>
+        <span class="code">${s.code}</span><b>${esc(s.name)}</b><span class="muted small">${esc(s.tl)} · ${esc(s.desc)}</span>
+        <span class="stats"><span>Next in line <b>${nx?esc(nx.num):'—'}</b></span><span>Waiting <b>${w}</b></span><span>Slots left <b>${st.left}</b></span><span>Cut-off <b>${cutLabel(s)}</b></span></span>
+        ${pill(st.k, st.t)}</button>`; }).join('')}</div>`;
+  } else {
+    const s = svcBy(flow.svc);
+    body = `<h2 style="margin-bottom:4px">Your details</h2><p class="muted" style="margin-bottom:14px">${esc(s.name)} · ${PRIO[flow.prio]} lane · <button class="back" style="margin:0;display:inline" data-act="flowStep" data-v="2" type="button">change</button></p>
+    <form data-form="book" class="stack" novalidate>
+      <div class="form-grid">
+        <div class="field"><label for="bName">Full name</label><input type="text" id="bName" name="name" required autocomplete="name" placeholder="Juan Dela Cruz"></div>
+        <div class="field"><label for="bAge">Age</label><input type="number" id="bAge" name="age" min="0" max="120" required></div>
+        <div class="field"><label for="bContact">Mobile number</label><input type="tel" id="bContact" name="contact" placeholder="09XX XXX XXXX" required></div>
+        <div class="field"><label for="bAddr">Purok / Street</label><input type="text" id="bAddr" name="address" placeholder="Purok 3, Sampaguita St." required></div>
+      </div>
+      <label class="check"><input type="checkbox" name="resident" id="bRes" required> I am a resident of Barangay Kaligayahan.</label>
+      ${flow.prio!=='regular' ? `<fieldset class="proofbox"><legend>Proof of priority status</legend>
+        <div class="form-grid">
+          <div class="field"><label for="bProof">ID or document you will present</label><select id="bProof" name="proof" required><option value="">Choose one</option>${PROOFS[flow.prio].map(p => `<option>${esc(p)}</option>`).join('')}</select></div>
+          <div class="field"><label for="bIdNo">ID / document number <span class="muted">(optional)</span></label><input type="text" id="bIdNo" name="idno" placeholder="e.g. OSCA-QC-5-012345" autocomplete="off"></div>
+        </div>
+        <div class="field"><label for="bPhoto">Photo of your ID or proof <span class="muted">(optional, helps staff check faster)</span></label><input type="file" id="bPhoto" accept="image/*">
+          ${flowPhoto ? `<img class="preview" src="${flowPhoto}" alt="Preview of uploaded proof">` : ''}</div>
+        ${validationNotice(true)}
+      </fieldset>` : ''}
+      ${flow.err ? `<p class="err" role="alert">${esc(flow.err)}</p>` : ''}
+      <div class="btn-row"><button class="btn primary" type="submit">Get my queue number</button><button class="btn ghost" type="button" data-act="flowStep" data-v="2">Back</button></div>
+    </form>`;
+  }
+  return head + `${mine ? `<div class="notice info" style="margin-bottom:14px">${icon('receipt')}<div>You already have ticket <b class="mono">${esc(mine.num)}</b> today. <a href="#ticket" data-act="go" data-to="ticket">View it</a>. You can still get a number for a family member.</div></div>` : ''}
+  <ol class="steps">${steps.map((t,i) => `<li class="${i+1===flow.step?'cur':i+1<flow.step?'done':''}"><i>${i+1}</i>${t}</li>`).join('')}</ol>
+  <section class="card">${body}</section>`;
+}
+
+function validationNotice(compact){
+  return `<div class="notice warn" style="margin-top:${compact?0:16}px">${icon('idcard')}<div><b>Priority patients need ID validation.</b> After you get your number, present your ID or proof at the triage desk. A health center staff member will check it in about ${VAL_MIN}–${VAL_MAX} minutes. You join the priority lane once it is approved. If your document cannot be validated, you will be moved to the regular lane.</div></div>`;
+}
+function validationTracker(t){
+  const v = t.val; if (!v) return '';
+  if (v.status === 'rejected') return `<div class="valbox bad"><h4>ID not validated</h4><p class="small">Your ${esc(v.proof)} could not be validated${v.reason?': '+esc(v.reason):''}. You were moved to the regular lane. Your old number ${esc(t.origNum||'')} is no longer valid.</p></div>`;
+  const st = v.status, c = st==='checking';
+  const cls = i => st==='approved' ? 'done' : st==='pending' ? (i===0?'done':i===1?'cur':'') : (i<=1?'done':i===2?'cur':'');
+  return `<div class="valbox ${st==='approved'?'ok':''}"><h4>${st==='approved' ? 'Priority ID validated' : 'Priority ID validation'}</h4>
+    <ol class="track">
+      <li class="${cls(0)}"><span>Queue number issued<small>${fmt(t.cmin)}</small></span></li>
+      <li class="${cls(1)}"><span>Present your ${esc(v.proof)} at the triage desk<small>${st==='pending' ? 'Go to the triage desk now' : 'Received by staff'}</small></span></li>
+      <li class="${cls(2)}"><span>Staff checks your document<small>${c ? `Checking now · <span class="timer" data-since="${v.start}">${fmtDur(Date.now()-v.start)}</span> (usually ${VAL_MIN}–${VAL_MAX} min)` : st==='approved' && v.start && v.end ? `Took ${fmtDur(v.end - v.start)} min` : `About ${VAL_MIN}–${VAL_MAX} minutes`}</small></span></li>
+      <li class="${cls(3)}"><span>Priority lane confirmed<small>${st==='approved' ? 'You are in the priority lane' : 'You will be called ahead of regular patients'}</small></span></li>
+    </ol></div>`;
+}
+function receiptHtml(t, forAdmin){
+  const s = svcBy(t.svc), nx = nextFor(t.svc);
+  const pendingVal = t.status==='waiting' && !isValidated(t);
+  const [k,lbl] = pendingVal ? VAL_ST[t.val.status] : T_ST[t.status];
+  const ahead = aheadOf(t);
+  const msg = pendingVal ? (t.val.status==='checking' ? 'Staff is checking your document. Please stay near the triage desk.' : `Present your ${esc(t.val.proof)} at the triage desk so staff can validate it.`)
+    : t.status==='serving' ? 'It is your turn. Please proceed to the triage desk now.'
+    : t.status==='waiting' ? `Please be at the health center when ${ahead<=2?'your number is near':'there are 2–3 patients ahead of you'}.`
+    : t.status==='skipped' ? 'You were called but not present. Please go to the triage desk.'
+    : t.status==='served' ? 'Thank you for visiting. Get well soon!'
+    : t.status==='noshow' ? 'This ticket was marked as no-show.' : 'This ticket was cancelled.';
+  return `<div class="receipt">
+    <div class="receipt-top"><svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="var(--primary-ink)" opacity=".18"/><path d="M17 11h6v6h6v6h-6v6h-6v-6h-6v-6h6z" fill="var(--primary-ink)"/></svg>
+      <div><b>Barangay Kaligayahan Health Center</b><span>Online queue receipt · ${esc(dateShort(t.date))}</span></div></div>
+    <div class="receipt-body">
+      <div class="qnum"><div class="eyebrow">Queue number · ${esc(s.name)}</div><div class="big" aria-live="polite">${esc(t.num)}</div>${pill(k,lbl)}</div>
+      <div class="rgrid">
+        <div><span>Next in line</span><b>${nx ? (nx.id === t.id ? 'You' : esc(nx.num)) : '—'}</b></div>
+        <div><span>Patients ahead</span><b>${t.status==='waiting'?(pendingVal?ahead+'*':ahead):'—'}</b></div>
+        <div><span>Est. waiting time</span><b>${t.status==='waiting'?'~'+estWait(t)+' min':'—'}</b></div>
+        <div><span>Lane</span><b style="font-size:.95rem;font-family:var(--f-body);font-weight:700">${t.prio==='regular'?'Regular':'Priority'}</b></div>
+      </div>
+      <p class="small" style="text-align:center">${msg}</p>
+      ${pendingVal ? `<p class="small muted" style="text-align:center;margin-top:-6px">* Estimate after validation, including about ${VAL_MIN}–${VAL_MAX} minutes for the ID check.</p>` : ''}
+      ${validationTracker(t)}
+      <div class="perf"></div>
+      <div class="rlines">
+        <div><span>Name</span><b>${esc(t.name)}</b></div>
+        <div><span>Category</span><b>${PRIO[t.prio]}${t.origPrio ? ' (was '+PRIO[t.origPrio]+')' : ''}</b></div>
+        ${t.val ? `<div><span>Proof</span><b style="text-align:right">${esc(t.val.proof)}</b></div>` : ''}
+        <div><span>Service</span><b>${esc(s.name)} (${s.code})</b></div>
+        <div><span>Issued</span><b class="num">${fmt(t.cmin)}</b></div>
+      </div>
+      <div class="perf"></div>
+      <div class="vcode"><div class="qrbox" id="qr-${t.id}" aria-label="QR code of verification code"></div><div style="text-align:center"><div class="eyebrow">Verification code</div><div class="code">${esc(t.code)}</div><p class="small muted" style="margin-top:6px">Show this at the triage desk.</p></div></div>
+    </div></div>`;
+}
+function viewTicket(){
+  const mine = mineToday();
+  let t = mine.find(x => x.id === viewTicketId) || mine.find(x => ['waiting','serving','skipped'].includes(x.status)) || mine[0];
+  const head = `${backBtn()}<div class="page-head"><div><div class="eyebrow">My queue ticket</div><h1>${t ? 'Your online receipt' : 'No ticket yet today'}</h1>${t?'<p>This page updates as the queue moves. Keep it open or take a screenshot.</p>':''}</div></div>`;
+  if (!t) return head + `<section class="card" style="max-width:520px"><p style="margin-bottom:14px">You have not taken a queue number today on this device.</p><button class="btn primary" data-act="go" data-to="queue" type="button">Get a queue number</button></section>`;
+  const others = mine.filter(x => x.id !== t.id);
+  return head + receiptHtml(t) + `
+  <div class="btn-row" style="justify-content:center;margin-top:16px">
+    <button class="btn ghost" data-act="go" data-to="home" type="button">Back to home</button>
+    ${t.status==='waiting' ? `<button class="btn danger" data-act="cancelMine" data-id="${t.id}" data-confirm="Tap again to cancel" type="button">Cancel this ticket</button>` : ''}
+  </div>
+  ${others.length ? `<section class="card" style="max-width:420px;margin:18px auto 0"><h3 style="margin-bottom:8px">Other tickets today</h3><div class="btn-row">${others.map(o => `<button class="btn ghost sm mono" data-act="showTicket" data-id="${o.id}" type="button">${esc(o.num)} · ${T_ST[o.status][1]}</button>`).join('')}</div></section>` : ''}`;
+}
+function drawQR(){
+  if (!window.QRCode) { if (document.readyState === 'complete') document.querySelectorAll('.qrbox').forEach(el => el.hidden = true); return; }
+  document.querySelectorAll('.qrbox').forEach(el => {
+    if (el.dataset.done) return; el.dataset.done = '1';
+    const t = S.tickets.find(x => 'qr-' + x.id === el.id); if (!t) return;
+    try { new QRCode(el, { text:`BKHC|${t.code}|${t.num}|${t.date}`, width:92, height:92, colorDark:'#062A3D', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.M }); } catch(e){}
+  });
+}
+
+/* =========================================================
+   ADMIN VIEWS
+   ========================================================= */
+let adminTab = 'dash', qSvc = 'CU', apF = 'active', apSvc = 'all', apQ = '';
+const isAdmin = () => ss.get(AKEY) === '1';
+const TABS = [['dash','dash','Dashboard'],['queue','queue','Queue'],['valid','idcard','ID validation'],['appts','cal','Appointments'],['doctors','doctor','Doctors'],['meds','medicine','Medicines'],['ann','announce','Announcements'],['sched','clock','Schedule & services'],['reports','chart','Reports']];
+
+function viewLogin(){
+  return `<section class="card login">
+    <div class="eyebrow">Health center staff</div><h1 style="margin:4px 0 6px">Admin login</h1>
+    <p class="muted small" style="margin-bottom:16px">For nurses, midwives and barangay health workers who update the system.</p>
+    <form data-form="login" class="stack" novalidate>
+      <div class="field"><label for="lUser">Username</label><input type="text" id="lUser" name="u" autocomplete="username" value="admin"></div>
+      <div class="field"><label for="lPass">Password</label><input type="password" id="lPass" name="p" autocomplete="current-password"></div>
+      <p id="lErr" class="err" hidden></p>
+      <button class="btn primary" type="submit">Log in</button>
+      <p class="small muted">Prototype account: <span class="mono">admin</span> / <span class="mono">kaligayahan</span></p>
+    </form></section>`;
+}
+
+function kpi(v, l, alert){ return `<div class="kpi${alert?' alert':''}"><b>${v}</b><span>${l}</span></div>`; }
+
+function qCard(s, full){
+  const cur = servingFor(s.code), w = waitingFor(s.code), line = lineFor(s.code), nx = line[0], st = serviceState(s), started = s.startedOn === now().date;
+  return `<div class="qcard">
+    <div class="card-head" style="margin:0"><div><span class="code mono" style="color:var(--primary);font-weight:700">${s.code}</span> <b>${esc(s.name)}</b></div>${started?pill('ok','Queue running'):pill('neutral','Not started')}</div>
+    <div><div class="eyebrow">Next in line</div><div class="now ${nx?'':'idle'}">${nx?esc(nx.num):'None'}</div>${nx?`<span class="small muted">${esc(nx.name)} · ${PRIO[nx.prio]}${isValidated(nx)?'':' · ID pending'}</span>`:''}</div>
+    <div class="small">At the desk: <b class="mono">${cur?esc(cur.num):'—'}</b>${cur?` <span class="muted">${esc(cur.name)}</span>`:''}</div>
+    <div class="small muted num">${(() => { const pv = pendingValidation().filter(t => t.svc===s.code).length; return pv ? `<span class="pill warn plain" style="margin-bottom:4px">${pv} awaiting ID validation</span><br>` : ''; })()}Waiting <b style="color:var(--ink)">${line.length}</b> · Slots left ${st.left}/${s.limit}</div>
+    <div class="btn-row">
+      ${started ? `<button class="btn primary sm" data-act="callNext" data-v="${s.code}" type="button" ${w.length||cur?'':'disabled'}>${cur?'Mark served & call next':'Call next patient'}</button>` : `<button class="btn primary sm" data-act="startQ" data-v="${s.code}" type="button">Start queue</button>`}
+      ${full && cur ? `<button class="btn ghost sm" data-act="tStatus" data-id="${cur.id}" data-v="served" type="button">Mark served</button><button class="btn ghost sm" data-act="tStatus" data-id="${cur.id}" data-v="skipped" type="button">Skip</button>` : ''}
+    </div></div>`;
+}
+
+function aDash(){
+  const tt = todayTickets(), active = tt.filter(t => t.status!=='cancelled');
+  const docsAvail = S.doctors.filter(d => d.available && docState(d).duty).length;
+  const svcOpen = S.services.filter(s => serviceState(s).ok).length;
+  const alerts = S.medicines.filter(m => m.status!=='available').sort((a,b)=>(a.status==='out'?0:1)-(b.status==='out'?0:1)||a.name.localeCompare(b.name));
+  return `<div class="page-head"><div><div class="eyebrow">${esc(dateLong(now().date))}</div><h1>Dashboard</h1></div><div>${centerStatus().open?pill('ok','Center open'):pill('crit','Center closed')}</div></div>
+  <div class="kpis">
+    ${kpi(active.length,"Today's patients")}
+    ${kpi(tt.filter(t=>t.status==='waiting').length,'Current queue (waiting)')}
+    ${kpi(pendingValidation().length,'Awaiting ID validation', pendingValidation().some(t => t.val.status==='checking' && Date.now()-t.val.start > VAL_MAX*60000))}
+    ${kpi(`${docsAvail}<span class="muted" style="font-size:1rem">/${S.doctors.length}</span>`,'Available doctors & staff')}
+    ${kpi(`${svcOpen}<span class="muted" style="font-size:1rem">/${S.services.length}</span>`,'Services accepting patients')}
+    ${kpi(alerts.length,'Medicine alerts', alerts.some(m=>m.status==='out'))}
+  </div>
+  ${valAlert()}
+  <h2 style="margin-bottom:12px">Current queue</h2>
+  <div class="qcards" style="margin-bottom:20px">${S.services.map(s => qCard(s,false)).join('')}</div>
+  <div class="grid-2">
+    <section class="card"><div class="card-head"><h2>Medicine alerts</h2><button class="btn ghost sm" data-act="aTab" data-v="meds" type="button">Manage</button></div>
+      ${alerts.length ? `<div class="list">${alerts.map(m => `<div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><b>${esc(m.name)}</b><span class="sub muted small" style="display:block">${m.stock} ${esc(m.form.toLowerCase())}s left · reorder at ${m.thr}</span></div>${pill(...MED_ST[m.status])}</div>`).join('')}</div>` : '<p class="muted">All medicines are in stock.</p>'}</section>
+    <section class="card"><div class="card-head"><h2>Doctors &amp; staff today</h2><button class="btn ghost sm" data-act="aTab" data-v="doctors" type="button">Manage</button></div>
+      <div class="list">${S.doctors.map(d => { const st = docState(d); return `<div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><b>${esc(d.name)}</b><span class="muted small" style="display:block">${fmtT(d.start)} – ${fmtT(d.end)} · ${esc(d.role)}</span></div>${pill(st.k,st.t)}</div>`; }).join('')}</div></section>
+  </div>`;
+}
+
+function aQueue(){
+  const s = svcBy(qSvc); const w = lineFor(qSvc); const sk = todayTickets().filter(t => t.svc===qSvc && t.status==='skipped');
+  const T = now().date;
+  return `<div class="page-head"><div><div class="eyebrow">Queue management</div><h1>Queue</h1></div>
+    <div class="btn-row"><span class="small muted" style="align-self:center">Turned away today: <b class="num" style="color:var(--ink)">${S.turned[T]||0}</b></span><button class="btn ghost sm" data-act="turnAway" type="button">+1 walk-in turned away</button></div></div>
+  ${valAlert()}
+  <div class="qcards" style="margin-bottom:20px">${S.services.map(x => qCard(x,true)).join('')}</div>
+  <section class="card">
+    <div class="card-head"><h2>Waiting patients</h2><div class="chips">${S.services.map(x => `<button class="chip" type="button" data-act="qSvc" data-v="${x.code}" aria-pressed="${qSvc===x.code}">${x.code} · ${lineFor(x.code).length}</button>`).join('')}</div></div>
+    <div class="table-wrap"><table><thead><tr><th>Order</th><th>Queue no.</th><th>Patient</th><th>Lane</th><th>Issued</th><th>Verified</th><th></th></tr></thead><tbody>
+    ${w.length ? w.map((t,i) => `<tr><td class="num">${i+1}</td><td class="mono"><b>${esc(t.num)}</b></td><td style="min-width:150px">${esc(t.name)}<span class="sub">${esc(t.address)} · ${t.age} yrs</span></td><td>${t.prio==='regular'?pill('neutral','Regular',true):pill('prio',PRIO[t.prio],true)}</td><td class="num" style="white-space:nowrap">${fmt(t.cmin)}</td><td>${!isValidated(t) ? pill(...VAL_ST[t.val.status]) : t.confirmed?pill('ok','Yes',true):pill('neutral','Not yet',true)}</td>
+      <td><div class="btn-row" style="flex-wrap:nowrap">${isValidated(t) ? `<button class="btn ghost sm" data-act="callThis" data-id="${t.id}" type="button">Call now</button><button class="btn ghost sm" data-act="tStatus" data-id="${t.id}" data-v="skipped" type="button">Skip</button>` : `<button class="btn ghost sm" data-act="aTab" data-v="valid" type="button">Validate ID</button>`}</div></td></tr>`).join('')
+      : `<tr><td colspan="7" class="empty">No one is waiting for ${esc(s.name)}.</td></tr>`}
+    </tbody></table></div>
+    ${sk.length ? `<h3 style="margin:16px 0 8px">Skipped</h3><div class="btn-row">${sk.map(t => `<button class="btn ghost sm" data-act="recall" data-id="${t.id}" type="button"><span class="mono">${esc(t.num)}</span> · Recall</button>`).join('')}</div>` : ''}
+  </section>`;
+}
+
+function aAppts(){
+  const q = apQ.trim().toLowerCase();
+  const F = { active:['waiting','serving','skipped'], all:null, served:['served'], noshow:['noshow'], cancelled:['cancelled'] };
+  const list = todayTickets().filter(t => (!F[apF] || F[apF].includes(t.status)) && (apSvc==='all' || t.svc===apSvc) && (!q || t.name.toLowerCase().includes(q) || t.code.toLowerCase().includes(q) || t.num.toLowerCase().includes(q)))
+    .sort((a,b)=>a.cmin-b.cmin);
+  return `<div class="page-head"><div><div class="eyebrow">Appointment management</div><h1>Today's appointments</h1><p>Verify a patient by typing the code on their online receipt.</p></div></div>
+  <div class="toolbar">
+    <label class="search">${icon('search','',3.5).replace('<svg ','<svg width="18" height="18" ')}<input type="text" id="apSearch" placeholder="Search name, queue no. or code (KLG-…)" value="${esc(apQ)}" autocomplete="off" aria-label="Search appointments"></label>
+    <select id="apSvc" data-change="apSvc" aria-label="Service" style="width:auto"><option value="all">All services</option>${S.services.map(s=>`<option value="${s.code}"${apSvc===s.code?' selected':''}>${esc(s.name)}</option>`).join('')}</select>
+  </div>
+  <div class="chips" style="margin-bottom:12px">${[['active','Active'],['all','All'],['served','Completed'],['noshow','No-show'],['cancelled','Cancelled']].map(([v,l])=>`<button class="chip" type="button" data-act="apF" data-v="${v}" aria-pressed="${apF===v}">${l}</button>`).join('')}</div>
+  <div class="table-wrap" id="apTable">${apTable(list)}</div>`;
+}
+function apTable(list){
+  return `<table><thead><tr><th>Queue no.</th><th>Patient</th><th>Service</th><th>Issued</th><th>Status</th><th>Code</th><th>Actions</th></tr></thead><tbody>
+  ${list.length ? list.map(t => { const [k,l] = T_ST[t.status]; const live = ['waiting','serving','skipped'].includes(t.status);
+    return `<tr><td class="mono"><b>${esc(t.num)}</b></td><td>${esc(t.name)}<span class="sub">${PRIO[t.prio]} · ${esc(t.contact)}</span></td><td>${esc(svcBy(t.svc).name)}</td><td class="num">${fmt(t.cmin)}</td>
+      <td>${pill(k,l)} ${t.status==='waiting' && !isValidated(t) ? pill(...VAL_ST[t.val.status]) : ''} ${t.confirmed?pill('ok','Verified',true):''}</td><td class="mono small">${esc(t.code)}</td>
+      <td><div class="btn-row" style="flex-wrap:nowrap">${live ? `${t.confirmed?'':`<button class="btn primary sm" data-act="confirm" data-id="${t.id}" type="button">Confirm</button>`}<button class="btn ghost sm" data-act="tStatus" data-id="${t.id}" data-v="served" type="button">Completed</button><button class="btn ghost sm" data-act="tStatus" data-id="${t.id}" data-v="noshow" type="button">No-show</button><button class="btn danger sm" data-act="tStatus" data-id="${t.id}" data-v="cancelled" data-confirm="Cancel?" type="button">Cancel</button>` : '<span class="muted small">—</span>'}</div></td></tr>`; }).join('')
+    : '<tr><td colspan="7" class="empty">No appointments match.</td></tr>'}
+  </tbody></table>`;
+}
+
+function aDoctors(){
+  return `<div class="page-head"><div><div class="eyebrow">Doctor management</div><h1>Doctors &amp; staff</h1><p>Set schedules, consultation limits, and mark who is available today.</p></div><button class="btn primary" data-act="docEdit" type="button">Add doctor</button></div>
+  <div class="table-wrap"><table><thead><tr><th>Name</th><th>Schedule</th><th>Limit / day</th><th>Today</th><th>Actions</th></tr></thead><tbody>
+  ${S.doctors.map(d => { const st = docState(d); return `<tr><td><b>${esc(d.name)}</b><span class="sub">${esc(d.role)}</span></td>
+    <td>${daysLabel(d.days)}<span class="sub num">${fmtT(d.start)} – ${fmtT(d.end)}</span></td><td class="num">${d.limit}</td>
+    <td>${pill(st.k,st.t)}${d.note?`<span class="sub">${esc(d.note)}</span>`:''}</td>
+    <td><div class="btn-row" style="flex-wrap:nowrap"><button class="btn ${d.available?'ghost':'primary'} sm" data-act="docToggle" data-id="${d.id}" type="button">Mark ${d.available?'unavailable':'available'}</button><button class="btn ghost sm" data-act="docEdit" data-id="${d.id}" type="button">Edit</button><button class="btn danger sm" data-act="docDel" data-id="${d.id}" data-confirm="Remove?" type="button">Remove</button></div></td></tr>`; }).join('')}
+  </tbody></table></div>`;
+}
+function docForm(d){
+  d = d || { id:'', name:'', role:'', days:[1,2,3,4,5], start:'08:00', end:'17:00', available:true, limit:20, note:'' };
+  return `<h2>${d.id?'Edit doctor':'Add doctor'}</h2>
+  <form data-form="doc" data-id="${d.id}" class="stack" novalidate>
+    <div class="form-grid">
+      <div class="field"><label for="dName">Name</label><input type="text" id="dName" name="name" value="${esc(d.name)}" required placeholder="Dr. Juan Dela Cruz"></div>
+      <div class="field"><label for="dRole">Specialty / role</label><input type="text" id="dRole" name="role" value="${esc(d.role)}" placeholder="General Medicine"></div>
+      <div class="field"><label for="dStart">Available from</label><input type="time" id="dStart" name="start" value="${d.start}"></div>
+      <div class="field"><label for="dEnd">Until</label><input type="time" id="dEnd" name="end" value="${d.end}"></div>
+      <div class="field"><label for="dLimit">Consultation limit per day</label><input type="number" id="dLimit" name="limit" min="1" value="${d.limit}"></div>
+      <div class="field"><label for="dNote">Note shown to residents</label><input type="text" id="dNote" name="note" value="${esc(d.note)}" placeholder="e.g. On leave until Monday"></div>
+    </div>
+    <fieldset class="field" style="border:0;padding:0;margin:0"><legend style="font-weight:600;font-size:.9rem;margin-bottom:6px">Duty days</legend>
+      <div class="btn-row">${[1,2,3,4,5,6,0].map(x => `<label class="check chip" style="padding:5px 10px"><input type="checkbox" name="day" value="${x}" ${d.days.includes(x)?'checked':''}> ${DOW[x]}</label>`).join('')}</div></fieldset>
+    <label class="check"><input type="checkbox" name="available" id="dAvail" ${d.available?'checked':''}> Available</label>
+    <p class="err" id="dErr" hidden></p>
+    <div class="btn-row"><button class="btn primary" type="submit">Save doctor</button><button class="btn ghost" type="button" data-act="closeModal">Cancel</button></div>
+  </form>`;
+}
+
+function aMeds(){
+  return `<div class="page-head"><div><div class="eyebrow">Medicine management</div><h1>Medicine inventory</h1><p>Updating stock sets the status automatically (at or below the reorder level = low stock, zero = out of stock). You can also set the status by hand.</p></div><button class="btn primary" data-act="medAdd" type="button">Add medicine</button></div>
+  ${medToolbar()}
+  <div class="table-wrap"><table><thead><tr><th>Medicine</th><th>Stock on hand</th><th>Reorder level</th><th>Status</th><th>Set status</th><th></th></tr></thead><tbody id="medBody">${medRowsHtml(true)}</tbody></table></div>`;
+}
+function medForm(){
+  return `<h2>Add medicine</h2><form data-form="med" class="stack" novalidate>
+    <div class="form-grid">
+      <div class="field"><label for="mName">Medicine name and strength</label><input type="text" id="mName" name="name" required placeholder="Paracetamol 500 mg"></div>
+      <div class="field"><label for="mForm">Form</label><select id="mForm" name="form">${['Tablet','Capsule','Syrup','Suspension','Nebule','Sachet','Vial','Ointment','Drops'].map(f=>`<option>${f}</option>`).join('')}</select></div>
+      <div class="field"><label for="mStock">Stock on hand</label><input type="number" id="mStock" name="stock" min="0" value="0"></div>
+      <div class="field"><label for="mThr">Reorder level</label><input type="number" id="mThr" name="thr" min="0" value="50"><span class="hint">Low stock is shown at or below this number.</span></div>
+    </div><p class="err" id="mErr" hidden></p>
+    <div class="btn-row"><button class="btn primary" type="submit">Add medicine</button><button class="btn ghost" type="button" data-act="closeModal">Cancel</button></div></form>`;
+}
+
+function aAnn(){
+  const n = now();
+  return `<div class="page-head"><div><div class="eyebrow">Announcements</div><h1>Post an announcement</h1><p>Doctor leaves, holiday schedules and service cut-offs appear on the residents' home page.</p></div></div>
+  <div class="grid-2">
+    <section class="card"><form data-form="ann" class="stack" novalidate>
+      <div class="form-grid">
+        <div class="field"><label for="aType">Type</label><select id="aType" name="type">${Object.entries(ANN_T).map(([v,[,l]])=>`<option value="${v}">${l}</option>`).join('')}</select></div>
+        <div class="field"><label for="aDate">Date</label><input type="date" id="aDate" name="date" value="${n.date}"></div>
+      </div>
+      <div class="field"><label for="aTitle">Title</label><input type="text" id="aTitle" name="title" required placeholder="Dr. Santos on leave on Friday"></div>
+      <div class="field"><label for="aBody">Details</label><textarea id="aBody" name="body" rows="4" placeholder="What residents need to know"></textarea></div>
+      <label class="check"><input type="checkbox" name="pinned" id="aPin"> Pin to top</label>
+      <p class="err" id="aErr" hidden></p>
+      <div class="btn-row"><button class="btn primary" type="submit">Post announcement</button></div>
+    </form></section>
+    <section class="card"><div class="card-head"><h2>Holiday &amp; closure dates</h2></div>
+      <form data-form="closure" class="form-grid" style="margin-bottom:14px;align-items:end" novalidate>
+        <div class="field"><label for="cDate">Date</label><input type="date" id="cDate" name="date" required></div>
+        <div class="field"><label for="cReason">Reason</label><input type="text" id="cReason" name="reason" placeholder="Holiday" required></div>
+        <button class="btn ghost" type="submit">Add closure</button>
+      </form>
+      <div class="list">${S.closures.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(c => `<div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><b>${esc(dateShort(c.date))}</b>${c.date<n.date?' '+pill('neutral','Past',true):''}<p class="muted small">${esc(c.reason)}</p></div><button class="btn danger sm" data-act="closureDel" data-id="${c.id}" data-confirm="Remove?" type="button">Remove</button></div>`).join('') || '<p class="muted">No closures.</p>'}</div>
+    </section>
+  </div>
+  <section class="card" style="margin-top:16px"><div class="card-head"><h2>Posted announcements</h2></div>
+    <div class="list">${S.announcements.slice().sort((a,b)=>(b.pinned-a.pinned)||b.date.localeCompare(a.date)).map(a => `<div style="display:flex;gap:12px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap">${annItem(a)}<div class="btn-row"><button class="btn ghost sm" data-act="annPin" data-id="${a.id}" type="button">${a.pinned?'Unpin':'Pin'}</button><button class="btn danger sm" data-act="annDel" data-id="${a.id}" data-confirm="Delete?" type="button">Delete</button></div></div>`).join('') || '<p class="muted">No announcements.</p>'}</div>
+  </section>`;
+}
+
+function aSched(){
+  const c = S.center;
+  return `<div class="page-head"><div><div class="eyebrow">Schedule &amp; services</div><h1>Operating hours and service limits</h1></div></div>
+  <div class="grid-2">
+  <section class="card"><form data-form="center" class="stack" novalidate>
+    <h2>Health center hours</h2>
+    <label class="check"><input type="checkbox" name="alwaysOpen" id="cAlways" ${c.alwaysOpen?'checked':''}> Open anytime (no operating hours)</label>
+    <p class="small muted" style="margin-top:-8px">Untick to use the opening time, closing time and clinic days below.</p>
+    <div class="form-grid">
+      <div class="field"><label for="cOpen">Opens</label><input type="time" id="cOpen" name="open" value="${c.open}"></div>
+      <div class="field"><label for="cClose">Closes</label><input type="time" id="cClose" name="close" value="${c.close}"></div>
+    </div>
+    <fieldset class="field" style="border:0;padding:0;margin:0"><legend style="font-weight:600;font-size:.9rem;margin-bottom:6px">Clinic days</legend>
+      <div class="btn-row">${[1,2,3,4,5,6,0].map(x => `<label class="check chip" style="padding:5px 10px"><input type="checkbox" name="day" value="${x}" ${c.days.includes(x)?'checked':''}> ${DOW[x]}</label>`).join('')}</div></fieldset>
+    <div class="form-grid">
+      <div class="field"><label for="cForce">Status today</label><select id="cForce" name="force">
+        <option value="auto"${c.force==='auto'?' selected':''}>Automatic (follow hours)</option><option value="open"${c.force==='open'?' selected':''}>Force open</option><option value="closed"${c.force==='closed'?' selected':''}>Force closed</option></select></div>
+      <div class="field"><label for="cNote">Reason shown to residents</label><input type="text" id="cNote" name="forceNote" value="${esc(c.forceNote)}" placeholder="e.g. Closed for disinfection"></div>
+    </div>
+    <div class="field"><label for="cOutside">Outside operating hours</label><select id="cOutside" name="outside">
+      <option value="queue"${c.outside==='queue'?' selected':''}>Close online queueing only (residents can still check info)</option>
+      <option value="site"${c.outside==='site'?' selected':''}>Lock the whole resident website</option></select></div>
+    <label class="check"><input type="checkbox" name="demo" id="cDemo" ${c.demo?'checked':''}> Demo mode: allow queueing at any time (for presentations)</label>
+    <div class="btn-row"><button class="btn primary" type="submit">Save hours</button></div>
+  </form></section>
+  <section class="card"><h2 style="margin-bottom:12px">Services</h2>
+    <form data-form="services" class="stack" novalidate>
+    <div class="table-wrap"><table><thead><tr><th>Service</th><th>Daily limit</th><th>Cut-off <span style="text-transform:none;letter-spacing:0">(blank = open)</span></th><th>Offered</th></tr></thead><tbody>
+    ${S.services.map(s => `<tr><td><b class="mono">${s.code}</b> ${esc(s.name)}</td><td><input class="inline-num" type="number" min="1" id="sl-${s.code}" name="limit-${s.code}" value="${s.limit}" aria-label="${esc(s.name)} daily limit"></td><td><input type="time" id="sc-${s.code}" name="cut-${s.code}" value="${s.cutoff}" placeholder="None" aria-label="${esc(s.name)} cut-off" style="width:auto"></td><td><input type="checkbox" id="so-${s.code}" name="open-${s.code}" ${s.open?'checked':''} aria-label="${esc(s.name)} offered today" style="width:18px;height:18px;accent-color:var(--primary)"></td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="btn-row"><button class="btn primary" type="submit">Save services</button><button class="btn danger" type="button" data-act="resetData" data-confirm="Tap again to reset all data">Reset sample data</button></div>
+    </form></section>
+  </div>`;
+}
+
+/* ---------- reports ---------- */
+function peakWindow(hours){
+  let best = -1, bi = 0;
+  for (let i = 0; i < hours.length - 1; i++) { const v = hours[i] + hours[i+1]; if (v > best) { best = v; bi = i; } }
+  if (best <= 0) return '—';
+  return `${fmt((8+bi)*60).replace(' AM','').replace(' PM','')}–${fmt((10+bi)*60)}`;
+}
+function todayStats(){
+  const T = now().date, tt = todayTickets();
+  const hours = Array(9).fill(0); tt.forEach(t => { const h = Math.floor(t.cmin/60) - 8; if (h >= 0 && h < 9) hours[h]++; });
+  const served = tt.filter(t => t.status==='served');
+  const waits = tt.filter(t => t.calledMin!=null).map(t => t.calledMin - t.cmin);
+  return {
+    date:T, appts:tt.length, served:served.length, turned:S.turned[T]||0,
+    noshow:tt.filter(t=>t.status==='noshow').length, cancelled:tt.filter(t=>t.status==='cancelled').length,
+    waiting:tt.filter(t=>t.status==='waiting').length, hours,
+    avgWait: waits.length ? Math.round(waits.reduce((a,b)=>a+b,0)/waits.length) : 0,
+    valDur: (() => { const d = tt.filter(t => t.val && t.val.start && t.val.end).map(t => t.val.end - t.val.start); return d.length ? d.reduce((a,b)=>a+b,0)/d.length : 0; })(),
+    valCount: tt.filter(t => t.val && t.val.end).length,
+    stockouts:S.medicines.filter(m=>m.status==='out')
+  };
+}
+function barChart(labels, series, opts){
+  const W = 440, H = opts.h || 230, L = 30, R = 6, Tp = 18, B = 26;
+  const totals = labels.map((_,i) => opts.stacked ? series.reduce((a,s)=>a+s.values[i],0) : Math.max(...series.map(s=>s.values[i])));
+  const rawMax = Math.max(1, ...totals); const step = rawMax <= 5 ? 1 : rawMax <= 12 ? 2 : rawMax <= 30 ? 5 : rawMax <= 60 ? 10 : 20;
+  const max = Math.ceil(rawMax/step)*step; const y = v => Tp + (H-Tp-B) * (1 - v/max);
+  const bw = (W-L-R)/labels.length; const barW = Math.min(38, bw*0.62);
+  let g = '';
+  for (let v = 0; v <= max; v += step) g += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--line)" stroke-width="1"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v}</text>`;
+  labels.forEach((lb,i) => {
+    const cx = L + bw*i + bw/2; let base = 0;
+    series.forEach(s => { const v = s.values[i]; if (v > 0) { const top = y(base+v), bot = y(base); g += `<rect x="${cx-barW/2}" y="${top}" width="${barW}" height="${Math.max(0,bot-top)}" rx="3" style="fill:${s.color}${opts.hi===i?'':';opacity:'+(opts.hi!=null?.55:1)}"><title>${esc(lb)}: ${v} ${esc(s.name)}</title></rect>`; } base += opts.stacked ? v : 0; });
+    if (opts.labelsTop) g += `<text x="${cx}" y="${y(totals[i])-5}" text-anchor="middle" style="fill:var(--ink)">${totals[i]||''}</text>`;
+    g += `<text x="${cx}" y="${H-9}" text-anchor="middle">${esc(lb)}</text>`;
+  });
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.label)}">${g}</svg></div>`;
+}
+function reportText(st){
+  return `DAILY QUEUE REPORT
+Barangay Kaligayahan Health Center
+${dateLong(st.date)}
+
+Total Patients:      ${st.appts - st.cancelled + st.turned}
+Served:              ${st.served}
+Turned Away:         ${st.turned}
+Appointments:        ${st.appts}
+No-shows:            ${st.noshow}
+Cancelled:           ${st.cancelled}
+Still in Queue:      ${st.waiting}
+Avg. Waiting Time:   ${st.avgWait} min
+Priority IDs Checked: ${st.valCount} (avg. ${fmtDur(st.valDur)} min)
+Peak Period:         ${peakWindow(st.hours)}
+Medicine Stock-outs: ${st.stockouts.length}${st.stockouts.length ? '\n  - ' + st.stockouts.map(m=>m.name).join('\n  - ') : ''}`;
+}
+function aReports(){
+  const st = todayStats();
+  const hrLabels = ['8AM','9AM','10AM','11AM','12PM','1PM','2PM','3PM','4PM'];
+  const peakIdx = st.hours.indexOf(Math.max(...st.hours));
+  const days = [...S.history, { date:st.date, served:st.served, turned:st.turned, noshow:st.noshow, appts:st.appts }];
+  const perSvc = S.services.map(s => { const l = todayTickets().filter(t=>t.svc===s.code); const w = l.filter(t=>t.calledMin!=null).map(t=>t.calledMin-t.cmin);
+    return { s, booked:l.length, served:l.filter(t=>t.status==='served').length, waiting:l.filter(t=>t.status==='waiting').length, noshow:l.filter(t=>t.status==='noshow').length, avg:w.length?Math.round(w.reduce((a,b)=>a+b,0)/w.length):null }; });
+  return `<div class="page-head"><div><div class="eyebrow">Reports</div><h1>Daily queue report</h1><p>Patient flow figures for ${esc(dateLong(st.date))}. Earlier days are sample data for the prototype.</p></div><button class="btn ghost" data-act="copyReport" type="button">Copy report</button></div>
+  <div class="kpis">
+    ${kpi(st.appts - st.cancelled + st.turned,'Daily patient count')}
+    ${kpi(st.served,'Number served')}
+    ${kpi(st.turned,'Number turned away', st.turned>0)}
+    ${kpi(st.appts,'Appointments')}
+    ${kpi(st.noshow,'No-shows')}
+    ${kpi(st.waiting,'Queue length now')}
+    ${kpi(st.avgWait+'<span class="muted" style="font-size:1rem"> min</span>','Avg. waiting time')}
+    ${kpi(st.valCount ? fmtDur(st.valDur) : '—','Avg. ID validation (min)', st.valDur > VAL_MAX*60000)}
+    ${kpi(st.stockouts.length,'Medicine stock-outs', st.stockouts.length>0)}
+  </div>
+  <div class="grid-2">
+    <section class="card"><div class="card-head"><h2>Arrivals by hour</h2><span class="small muted">Peak period: <b style="color:var(--ink)">${peakWindow(st.hours)}</b></span></div>
+      ${barChart(hrLabels, [{name:'patients', values:st.hours, color:'var(--primary)'}], {label:'Patients who got a queue number per hour today', labelsTop:true, hi: Math.max(...st.hours)>0?peakIdx:null})}</section>
+    <section class="card"><div class="card-head"><h2>Last 7 clinic days</h2><span class="small"><span class="pill ok plain" style="background:var(--primary-soft);color:var(--primary-deep)">Served</span> <span class="pill crit plain">Turned away</span></span></div>
+      ${barChart(days.map(d => d.date===st.date?'Today':dateShort(d.date).split(',')[0]), [{name:'served', values:days.map(d=>d.served), color:'var(--primary)'},{name:'turned away', values:days.map(d=>d.turned), color:'var(--crit)'}], {label:'Served and turned away per day', stacked:true, labelsTop:true})}</section>
+  </div>
+  <div class="grid-2" style="margin-top:16px">
+    <section class="card"><div class="card-head"><h2>By service</h2></div>
+      <div class="table-wrap"><table><thead><tr><th>Service</th><th>Booked</th><th>Served</th><th>Waiting</th><th>No-show</th><th>Avg. wait</th></tr></thead><tbody>
+      ${perSvc.map(r => `<tr><td>${esc(r.s.name)}</td><td class="num">${r.booked}</td><td class="num">${r.served}</td><td class="num">${r.waiting}</td><td class="num">${r.noshow}</td><td class="num">${r.avg==null?'—':r.avg+' min'}</td></tr>`).join('')}
+      </tbody></table></div></section>
+    <section class="card"><div class="card-head"><h2>Report preview</h2></div><div class="report" id="reportText">${esc(reportText(st))}</div></section>
+  </div>`;
+}
+
+function valAlert(){
+  const pv = pendingValidation(); if (!pv.length) return '';
+  return `<div class="notice warn" style="margin-bottom:16px">${icon('idcard')}<div><b>${pv.length} priority patient${pv.length>1?'s':''} waiting for ID validation.</b> They join the priority lane only after a staff member approves their ID or proof. <button class="back" style="margin:0;display:inline" data-act="aTab" data-v="valid" type="button">Open ID validation</button></div></div>`;
+}
+function valCard(t){
+  const v = t.val, c = v.status === 'checking', s = svcBy(t.svc);
+  const checks = { senior:['Name on ID matches the ticket','Photo on ID matches the patient','Birthdate shows 60 years old or above','ID is original and not expired'],
+    pwd:['Name on ID matches the ticket','Photo on ID matches the patient','PWD ID or certificate is original and not expired','Issued by the LGU / PDAO or a licensed physician'],
+    pregnant:['Name on document matches the ticket','Document is from a health facility or licensed provider','Record shows current pregnancy','Document is original (not a photocopy only)'] }[t.origPrio || t.prio];
+  return `<article class="vcard ${c?'checking':''}" data-vcard="${t.id}">
+    <div class="vhead"><div><span class="mono">${esc(t.num)}</span><div class="small muted" style="margin-top:4px">${esc(s.name)} · issued ${fmt(t.cmin)}</div></div>${pill(...VAL_ST[v.status])}</div>
+    <dl class="vfacts">
+      <dt>Patient</dt><dd>${esc(t.name)}, ${t.age} yrs</dd>
+      <dt>Category</dt><dd>${PRIO[t.prio]}</dd>
+      <dt>Proof</dt><dd>${esc(v.proof)}</dd>
+      <dt>ID no.</dt><dd class="mono" style="font-weight:500">${v.idNo ? esc(v.idNo) : '<span class="muted">Not given</span>'}</dd>
+    </dl>
+    ${v.photo ? `<img class="thumb" src="${v.photo}" alt="Uploaded proof of ${esc(t.name)}" data-act="viewPhoto" data-id="${t.id}">` : '<div class="nophoto">No photo uploaded. Check the original document at the desk.</div>'}
+    ${c ? `<div><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px" class="small"><span>Validation time <span class="timer" data-since="${v.start}">${fmtDur(Date.now()-v.start)}</span></span><span class="muted">target ${VAL_MIN}–${VAL_MAX} min</span></div>
+        <div class="tbar" style="margin-top:6px"><i style="width:${Math.min(100,(Date.now()-v.start)/(VAL_MAX*60000)*100)}%"></i><b style="left:${VAL_MIN/VAL_MAX*100}%"></b></div></div>
+      <div class="checklist" role="group" aria-label="Validation checklist">${checks.map((x,i) => `<label class="check"><input type="checkbox" id="vc-${t.id}-${i}"> ${esc(x)}</label>`).join('')}</div>
+      <div class="field"><label for="vr-${t.id}" class="small">Reason if rejected</label><input type="text" id="vr-${t.id}" placeholder="e.g. ID expired, name does not match"></div>
+      <div class="btn-row"><button class="btn primary sm" data-act="valApprove" data-id="${t.id}" type="button">Approve · priority lane</button><button class="btn danger sm" data-act="valReject" data-id="${t.id}" data-confirm="Tap again to move to regular" type="button">Reject · move to regular</button></div>`
+    : `<div class="btn-row"><button class="btn primary sm" data-act="valStart" data-id="${t.id}" type="button">Patient is at the desk · start validation</button></div>`}
+  </article>`;
+}
+function aValid(){
+  const pv = pendingValidation();
+  const done = todayTickets().filter(t => t.val && (t.val.status==='approved' || t.val.status==='rejected') && t.val.end).sort((a,b)=>b.val.end-a.val.end);
+  const durs = done.filter(t => t.val.start).map(t => (t.val.end - t.val.start)/60000);
+  const avg = durs.length ? durs.reduce((a,b)=>a+b,0)/durs.length : 0;
+  const within = durs.filter(d => d <= VAL_MAX).length;
+  return `<div class="page-head"><div><div class="eyebrow">Priority lane</div><h1>ID validation</h1><p>Senior citizens, PWDs and pregnant patients must present an ID or proof. Check each document in about ${VAL_MIN}–${VAL_MAX} minutes. Approved patients join the priority lane; rejected patients move to the regular lane with a new number.</p></div></div>
+  <div class="kpis kpis-3">
+    ${kpi(pv.filter(t=>t.val.status==='pending').length,'Waiting at the desk')}
+    ${kpi(pv.filter(t=>t.val.status==='checking').length,'Being validated now')}
+    ${kpi(done.filter(t=>t.val.status==='approved').length,'Approved today')}
+    ${kpi(done.filter(t=>t.val.status==='rejected').length,'Rejected today')}
+    ${kpi(durs.length ? fmtDur(avg*60000) : '—','Avg. validation time (min)', avg > VAL_MAX)}
+    ${kpi(durs.length ? Math.round(within/durs.length*100)+'%' : '—',`Done within ${VAL_MAX} min`)}
+  </div>
+  ${pv.length ? `<div class="vcards" style="margin-bottom:20px">${pv.map(valCard).join('')}</div>` : `<section class="card" style="margin-bottom:20px"><p class="empty">No priority patients are waiting for validation.</p></section>`}
+  <section class="card"><div class="card-head"><h2>Validated today</h2></div>
+    <div class="table-wrap"><table><thead><tr><th>Queue no.</th><th>Patient</th><th>Proof</th><th>Result</th><th>Time taken</th></tr></thead><tbody>
+    ${done.length ? done.map(t => `<tr><td class="mono"><b>${esc(t.num)}</b>${t.origNum?`<span class="sub">was ${esc(t.origNum)}</span>`:''}</td><td>${esc(t.name)}<span class="sub">${PRIO[t.origPrio||t.prio]}</span></td><td>${esc(t.val.proof)}</td><td>${pill(...VAL_ST[t.val.status])}${t.val.reason?`<span class="sub">${esc(t.val.reason)}</span>`:''}</td><td class="num">${t.val.start ? `<span class="${(t.val.end-t.val.start)>VAL_MAX*60000?'err':''}">${fmtDur(t.val.end-t.val.start)}</span>` : '—'}</td></tr>`).join('') : '<tr><td colspan="5" class="empty">No validations yet today.</td></tr>'}
+    </tbody></table></div></section>`;
+}
+function viewAdmin(){
+  if (!isAdmin()) return viewLogin();
+  const V = { dash:aDash, queue:aQueue, valid:aValid, appts:aAppts, doctors:aDoctors, meds:aMeds, ann:aAnn, sched:aSched, reports:aReports };
+  return `<div class="admin-shell">
+    <nav class="side" aria-label="Admin sections">${TABS.map(([k,ic,l]) => { const nb = k==='valid' ? pendingValidation().length : 0; return `<button type="button" data-act="aTab" data-v="${k}" ${adminTab===k?'aria-current="page"':''}>${icon(ic)}${l}${nb?`<span class="badge-n">${nb}</span>`:''}</button>`; }).join('')}</nav>
+    <div>${(V[adminTab]||aDash)()}</div></div>`;
+}
+
+/* =========================================================
+   ACTIONS, FORMS, ROUTING
+   ========================================================= */
+function toast(msg){
+  const r = $('#toastRoot'); r.innerHTML = `<div class="toast" role="status">${esc(msg)}</div>`;
+  clearTimeout(toast.t); toast.t = setTimeout(() => r.innerHTML = '', 2600);
+}
+function openModal(html){ $('#modalRoot').innerHTML = `<div class="modal-bg" data-act="bgClose"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`; const f = $('#modalRoot input'); if (f) f.focus(); }
+function closeModal(){ $('#modalRoot').innerHTML = ''; }
+const tById = id => S.tickets.find(t => t.id === id);
+const nowMin = () => now().min;
+
+function setStatus(t, v){
+  const m = nowMin();
+  if (v === 'served') { if (t.calledMin == null) t.calledMin = m; t.doneMin = m; t.confirmed = true; }
+  if (v === 'serving') { t.calledMin = m; }
+  if (v === 'noshow' || v === 'cancelled' || v === 'skipped') t.doneMin = null;
+  t.status = v;
+}
+function callNext(code){
+  const cur = servingFor(code); if (cur) setStatus(cur, 'served');
+  const nx = waitingFor(code)[0]; if (nx) setStatus(nx, 'serving');
+  return nx;
+}
+
+const A = {
+  go(d){ const to = d.to; if (location.hash.slice(1) === to) render(); else location.hash = to; },
+  pickLane(){ flow.lane = 'priority'; flow.prio = null; flowPhoto = ''; render(); },
+  pickPrio(d){ flow.prio = d.v; flow.lane = d.v === 'regular' ? 'regular' : 'priority'; flow.step = 2; flow.err = ''; render(); window.scrollTo({top:0}); },
+  pickSvc(d){
+    const s = svcBy(d.v), st = serviceState(s);
+    if (!st.ok) {
+      const k = 'ta-' + d.v + '-' + now().date;
+      if (!ss.get(k)) { ss.set(k,'1'); S.turned[now().date] = (S.turned[now().date]||0) + 1; save(); }
+      toast(`${s.name}: ${st.t.toLowerCase()}. Please come back on the next clinic day.`); return;
+    }
+    flow.svc = d.v; flow.step = 3; flow.err = ''; render(); window.scrollTo({top:0});
+  },
+  flowStep(d){ flow.step = +d.v; flow.err = ''; render(); },
+  showTicket(d){ viewTicketId = d.id; render(); },
+  cancelMine(d){ const t = tById(d.id); if (t && t.status === 'waiting') { setStatus(t,'cancelled'); commit('Ticket cancelled'); } },
+  medFilter(d){ medF = d.v; document.querySelectorAll('[data-act="medFilter"]').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === medF)); $('#medBody').innerHTML = medRowsHtml(route() === 'admin'); },
+  closeModal, bgClose(d, el, e){ if (e.target === el) closeModal(); },
+  aTab(d){ adminTab = d.v; medQ = ''; medF = 'all'; render(); window.scrollTo({top:0}); },
+  startQ(d){ const s = svcBy(d.v); s.startedOn = now().date; const nx = callNext(d.v); commit(nx ? `${s.name} queue started. Next in line: ${nx.num}` : `${s.name} queue started`); },
+  callNext(d){ const nx = callNext(d.v); commit(nx ? `Next in line: ${nx.num}` : 'No more patients waiting'); },
+  callThis(d){ const t = tById(d.id); const cur = servingFor(t.svc); if (cur) setStatus(cur,'served'); setStatus(t,'serving'); svcBy(t.svc).startedOn = now().date; commit(`Next in line: ${t.num}`); },
+  recall(d){ const t = tById(d.id); const cur = servingFor(t.svc); if (cur) { cur.status = 'waiting'; cur.calledMin = null; } setStatus(t,'serving'); commit(`Recalled ${t.num}`); },
+  tStatus(d){ const t = tById(d.id); setStatus(t, d.v); commit(`${t.num} marked ${T_ST[d.v][1].toLowerCase()}`); },
+  valStart(d){ const t = tById(d.id); t.val.status = 'checking'; t.val.start = Date.now(); commit(`Validating ${t.num}. Target: ${VAL_MIN}–${VAL_MAX} minutes`); },
+  valApprove(d){
+    const card = document.querySelector(`[data-vcard="${d.id}"]`);
+    const boxes = card ? [...card.querySelectorAll('.checklist input')] : [];
+    if (boxes.some(b => !b.checked)) { toast('Tick every item on the checklist before approving.'); return; }
+    const t = tById(d.id); t.val.status = 'approved'; t.val.end = Date.now(); if (!t.val.start) t.val.start = t.val.end; t.confirmed = true;
+    commit(`${t.num} approved in ${fmtDur(t.val.end - t.val.start)} min. Now in the priority lane.`);
+  },
+  valReject(d){
+    const t = tById(d.id); const reason = ($('#vr-' + d.id)?.value || '').trim();
+    t.val.status = 'rejected'; t.val.end = Date.now(); if (!t.val.start) t.val.start = t.val.end; t.val.reason = reason;
+    t.origNum = t.num; t.origPrio = t.prio; t.prio = 'regular';
+    const n = todayTickets().filter(x => x.svc === t.svc && x.prio === 'regular' && x.id !== t.id).length + 1;
+    t.num = `${t.svc}-${pad(n)}`;
+    commit(`${t.origNum} moved to the regular lane as ${t.num}`);
+  },
+  viewPhoto(d){ const t = tById(d.id); openModal(`<h2>${esc(t.val.proof)}</h2><p class="muted small" style="margin-bottom:12px">${esc(t.name)} · ${esc(t.num)}</p><img src="${t.val.photo}" alt="Uploaded proof" style="width:100%;border-radius:8px"><div class="btn-row" style="margin-top:14px"><button class="btn ghost" data-act="closeModal" type="button">Close</button></div>`); },
+  confirm(d){ const t = tById(d.id); t.confirmed = true; commit(`${t.num} verified`); },
+  turnAway(){ const T = now().date; S.turned[T] = (S.turned[T]||0) + 1; commit('Recorded 1 patient turned away'); },
+  qSvc(d){ qSvc = d.v; render(); },
+  apF(d){ apF = d.v; render(); },
+  docEdit(d){ openModal(docForm(d.id ? S.doctors.find(x => x.id === d.id) : null)); },
+  docToggle(d){ const x = S.doctors.find(y => y.id === d.id); x.available = !x.available; if (x.available) x.note = ''; commit(`${x.name} marked ${x.available?'available':'unavailable'}`); },
+  docDel(d){ S.doctors = S.doctors.filter(x => x.id !== d.id); commit('Doctor removed'); },
+  medAdd(){ openModal(medForm()); },
+  medStock(d){ const m = S.medicines.find(x => x.id === d.id); const v = Math.max(0, parseInt($('#stock-' + d.id).value, 10) || 0); m.stock = v; m.status = medStatusFor(v, m.thr); m.updated = now().date; commit(`${m.name}: ${v} in stock (${MED_ST[m.status][1].toLowerCase()})`); },
+  medDel(d){ S.medicines = S.medicines.filter(x => x.id !== d.id); commit('Medicine removed'); },
+  annPin(d){ const a = S.announcements.find(x => x.id === d.id); a.pinned = !a.pinned; commit(a.pinned ? 'Pinned' : 'Unpinned'); },
+  annDel(d){ S.announcements = S.announcements.filter(x => x.id !== d.id); commit('Announcement deleted'); },
+  closureDel(d){ S.closures = S.closures.filter(x => x.id !== d.id); commit('Closure removed'); },
+  resetData(){ S = seed(); flow = { step:1, prio:null, svc:null, err:'' }; commit('Sample data restored'); },
+  logout(){ ss.del(AKEY); location.hash = 'home'; toast('Logged out'); },
+  copyReport(){
+    const txt = reportText(todayStats());
+    const fallback = () => { const el = $('#reportText'); const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('Report selected. Press Ctrl+C to copy.'); };
+    try { navigator.clipboard.writeText(txt).then(() => toast('Report copied'), fallback); } catch(e){ fallback(); }
+  }
+};
+
+const F = {
+  book(fd, f){
+    const name = (fd.get('name')||'').trim(), age = parseInt(fd.get('age'),10), contact = (fd.get('contact')||'').replace(/\s|-/g,''), address = (fd.get('address')||'').trim();
+    if (!name || name.length < 3) return failBook('Enter your full name.');
+    if (!(age >= 0 && age <= 120)) return failBook('Enter a valid age.');
+    if (!/^(09|\+639)\d{9}$/.test(contact)) return failBook('Enter an 11-digit mobile number that starts with 09.');
+    if (!address) return failBook('Enter your purok or street.');
+    if (!fd.get('resident')) return failBook('Online queueing is for Barangay Kaligayahan residents. Tick the box to continue.');
+    if (flow.prio === 'senior' && age < 60) return failBook('The senior citizen lane is for ages 60 and above. Go back and choose Regular.');
+    if (flow.prio !== 'regular' && !fd.get('proof')) return failBook('Choose the ID or document you will present for validation.');
+    if (!queueOpen()) return failBook('Online queueing just closed for today.');
+    const s = svcBy(flow.svc), st = serviceState(s);
+    if (!st.ok) return failBook(`${s.name} is ${st.t.toLowerCase()}. Please choose another service.`);
+    const T = now().date, lane = flow.prio === 'regular' ? 'R' : 'P';
+    const n = todayTickets().filter(t => t.svc === s.code && (t.prio === 'regular' ? 'R' : 'P') === lane).length + 1;
+    const t = { id:uid(), date:T, svc:s.code, prio:flow.prio, num:`${s.code}-${lane==='P'?'P':''}${pad(n)}`, name, age, contact, address, code:vcode(), cmin:nowMin(), status:'waiting', confirmed:false, calledMin:null, doneMin:null,
+      val: flow.prio === 'regular' ? null : { status:'pending', proof:fd.get('proof'), idNo:(fd.get('idno')||'').trim().slice(0,40), photo:flowPhoto, start:null, end:null } };
+    S.tickets.push(t); addMyTicket(t.id); viewTicketId = t.id;
+    flow = { step:1, prio:null, svc:null, err:'' }; flowPhoto = '';
+    try { save(); } catch(e){}
+    location.hash = 'ticket'; render(); toast(`Your queue number is ${t.num}`); window.scrollTo({top:0});
+  },
+  login(fd){
+    if ((fd.get('u')||'').trim() === 'admin' && fd.get('p') === 'kaligayahan') { ss.set(AKEY,'1'); adminTab = 'dash'; render(); toast('Welcome, staff'); }
+    else { const e = $('#lErr'); e.textContent = 'Wrong username or password. Use the prototype account shown below.'; e.hidden = false; }
+  },
+  doc(fd, f){
+    const name = (fd.get('name')||'').trim(); const days = fd.getAll('day').map(Number);
+    const err = m => { const e = $('#dErr'); e.textContent = m; e.hidden = false; };
+    if (!name) return err('Enter the doctor\'s name.');
+    if (!days.length) return err('Choose at least one duty day.');
+    if (toMin(fd.get('end')) <= toMin(fd.get('start'))) return err('End time must be later than start time.');
+    const data = { name, role:(fd.get('role')||'').trim() || 'General Medicine', days, start:fd.get('start'), end:fd.get('end'), limit:Math.max(1, parseInt(fd.get('limit'),10)||1), note:(fd.get('note')||'').trim(), available:!!fd.get('available') };
+    if (f.dataset.id) Object.assign(S.doctors.find(x => x.id === f.dataset.id), data); else S.doctors.push({ id:uid(), ...data });
+    closeModal(); commit('Doctor saved');
+  },
+  med(fd){
+    const name = (fd.get('name')||'').trim();
+    if (!name) { const e = $('#mErr'); e.textContent = 'Enter the medicine name.'; e.hidden = false; return; }
+    const stock = Math.max(0, parseInt(fd.get('stock'),10)||0), thr = Math.max(0, parseInt(fd.get('thr'),10)||0);
+    S.medicines.push({ id:uid(), name, form:fd.get('form'), stock, thr, status:medStatusFor(stock,thr), updated:now().date });
+    closeModal(); commit(`${name} added`);
+  },
+  ann(fd){
+    const title = (fd.get('title')||'').trim();
+    if (!title) { const e = $('#aErr'); e.textContent = 'Add a title so residents know what this is about.'; e.hidden = false; return; }
+    S.announcements.push({ id:uid(), type:fd.get('type'), title, body:(fd.get('body')||'').trim(), date:fd.get('date') || now().date, pinned:!!fd.get('pinned') });
+    commit('Announcement posted');
+  },
+  closure(fd){
+    const date = fd.get('date'), reason = (fd.get('reason')||'').trim();
+    if (!date || !reason) { toast('Enter both a date and a reason.'); return; }
+    S.closures.push({ id:uid(), date, reason }); commit('Closure added');
+  },
+  center(fd){
+    const days = fd.getAll('day').map(Number);
+    if (!days.length) { toast('Choose at least one clinic day.'); return; }
+    if (toMin(fd.get('close')) <= toMin(fd.get('open'))) { toast('Closing time must be later than opening time.'); return; }
+    Object.assign(S.center, { alwaysOpen:!!fd.get('alwaysOpen'), open:fd.get('open'), close:fd.get('close'), days, force:fd.get('force'), forceNote:(fd.get('forceNote')||'').trim(), outside:fd.get('outside'), demo:!!fd.get('demo') });
+    commit('Hours saved');
+  },
+  services(fd){
+    S.services.forEach(s => { s.limit = Math.max(1, parseInt(fd.get('limit-'+s.code),10)||s.limit); s.cutoff = fd.get('cut-'+s.code) || ''; s.open = !!fd.get('open-'+s.code); });
+    commit('Services saved');
+  }
+};
+function failBook(msg){ flow.err = msg; const f = document.querySelector('[data-form="book"]'); const vals = f ? Object.fromEntries(new FormData(f)) : {}; render();
+  const g = document.querySelector('[data-form="book"]'); if (g) { ['name','age','contact','address','proof','idno'].forEach(k => { if (vals[k] != null) g.elements[k].value = vals[k]; }); if (vals.resident) g.elements.resident.checked = true; } }
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  if (el.tagName === 'A') e.preventDefault();
+  if (el.dataset.confirm && !el.dataset.armed) {
+    el.dataset.armed = '1'; const old = el.textContent; el.textContent = el.dataset.confirm;
+    setTimeout(() => { if (el.isConnected) { delete el.dataset.armed; el.textContent = old; } }, 3000); return;
+  }
+  const fn = A[el.dataset.act]; if (fn) fn(el.dataset, el, e);
+});
+document.addEventListener('submit', e => { const f = e.target; if (f.dataset.form && F[f.dataset.form]) { e.preventDefault(); F[f.dataset.form](new FormData(f), f); } });
+document.addEventListener('input', e => {
+  if (e.target.id === 'medSearch') { medQ = e.target.value; $('#medBody').innerHTML = medRowsHtml(route() === 'admin'); }
+  if (e.target.id === 'apSearch') { apQ = e.target.value; const q = apQ.trim().toLowerCase();
+    const F2 = { active:['waiting','serving','skipped'], all:null, served:['served'], noshow:['noshow'], cancelled:['cancelled'] };
+    $('#apTable').innerHTML = apTable(todayTickets().filter(t => (!F2[apF] || F2[apF].includes(t.status)) && (apSvc==='all' || t.svc===apSvc) && (!q || t.name.toLowerCase().includes(q) || t.code.toLowerCase().includes(q) || t.num.toLowerCase().includes(q))).sort((a,b)=>a.cmin-b.cmin)); }
+});
+document.addEventListener('change', e => {
+  const k = e.target.dataset && e.target.dataset.change; if (!k) return;
+  if (k === 'medStatus') { const m = S.medicines.find(x => x.id === e.target.dataset.id); m.status = e.target.value; m.updated = now().date; commit(`${m.name} set to ${MED_ST[m.status][1].toLowerCase()}`); }
+  if (k === 'apSvc') { apSvc = e.target.value; render(); }
+});
+document.addEventListener('change', e => {
+  if (e.target.id !== 'bPhoto' || !e.target.files || !e.target.files[0]) return;
+  const file = e.target.files[0];
+  if (!/^image\//.test(file.type)) { toast('Choose a photo (JPG or PNG).'); return; }
+  const f = document.querySelector('[data-form="book"]'); const vals = f ? Object.fromEntries(new FormData(f)) : {};
+  const rd = new FileReader();
+  rd.onload = () => { const img = new Image(); img.onload = () => {
+    const sc = Math.min(1, 640 / Math.max(img.width, img.height)); const c = document.createElement('canvas');
+    c.width = Math.round(img.width*sc); c.height = Math.round(img.height*sc); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    flowPhoto = c.toDataURL('image/jpeg', 0.6); render();
+    const g = document.querySelector('[data-form="book"]'); if (g) { ['name','age','contact','address','proof','idno'].forEach(k => { if (vals[k] != null && g.elements[k]) g.elements[k].value = vals[k]; }); if (vals.resident) g.elements.resident.checked = true; }
+  }; img.src = rd.result; };
+  rd.readAsDataURL(file);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#modalRoot').innerHTML) closeModal(); });
+
+function route(){ return (location.hash.slice(1) || 'home').toLowerCase(); }
+function render(){
+  renderStrip();
+  const r = route();
+  const btn = $('#adminBtn');
+  if (r === 'admin') {
+    btn.textContent = isAdmin() ? 'Log out' : 'Resident view';
+    btn.dataset.act = isAdmin() ? 'logout' : 'go'; btn.dataset.to = 'home';
+  } else { btn.textContent = 'Staff login'; btn.dataset.act = 'go'; btn.dataset.to = 'admin'; }
+  const V = { home:viewHome, status:viewStatus, doctors:viewDoctors, medicines:viewMedicines, queue:viewQueue, announcements:viewAnnouncements, ticket:viewTicket, admin:viewAdmin };
+  let html;
+  if (r !== 'admin' && siteLocked()) html = viewLocked();
+  else html = (V[r] || viewHome)();
+  app.innerHTML = html;
+  drawQR();
+  document.title = 'Kaligayahan Health Center Tracker';
+}
+function busy(){ const a = document.activeElement; return $('#modalRoot').innerHTML || (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName)); }
+
+window.addEventListener('hashchange', () => { render(); window.scrollTo({top:0}); });
+window.addEventListener('storage', e => { if (e.key === KEY) { load(); if (!busy()) render(); } });
+
+load();
+tickClock(); render();
+setInterval(tickClock, 1000);
+let lastMin = now().min;
+setInterval(() => { const m = now().min; if (m !== lastMin) { lastMin = m; if (!busy()) render(); else renderStrip(); } }, 5000);
+window.addEventListener('load', () => setTimeout(drawQR, 50));
+})();
+
+</script>
+</body></html>
