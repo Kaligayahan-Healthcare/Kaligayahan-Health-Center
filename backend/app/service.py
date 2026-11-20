@@ -45,31 +45,41 @@ def first_run_setup() -> None:
                 db.upsert("services", s, "setup")
             db.kv_set("created", L.now()["date"])
             db.kv_set("sample", False)
-            db.kv_set("hoursV", 2)
+            db.kv_set("hoursV", HOURS_V)
         db.bump()
     update_hours()
 
 
+HOURS_V = 3
+
+
 def update_hours() -> None:
-    """One-time update (Nov 2026): the clinic is open until 8 PM and online queueing for the
-    afternoon closes at 7 PM. Only the old default times (5 PM / 4 PM) are changed."""
-    if db.kv_get("hoursV"):
+    """One-time updates of the clinic hours (Nov 2026). Only the old default values are changed,
+    never times or days that staff chose themselves.
+      2: open until 8 PM (was 5 PM); afternoon online queueing until 7 PM (was 4 PM)
+      3: also open on Saturdays (was Monday to Friday)"""
+    v = int(db.kv_get("hoursV") or 1)
+    if v >= HOURS_V:
         return
     c = db.kv_get("center") or {}
-    changed = False
-    if c.get("close") == "17:00":
-        c["close"] = "20:00"
-        changed = True
-    for s in c.get("sessions") or []:
-        if s.get("id") == "pm" and s.get("cutoff") == "16:00":
-            s["cutoff"] = "19:00"
-            changed = True
+    changes = {}
+    if v < 2:
+        if c.get("close") == "17:00":
+            c["close"] = "20:00"
+            changes["close"] = "20:00"
+        for s in c.get("sessions") or []:
+            if s.get("id") == "pm" and s.get("cutoff") == "16:00":
+                s["cutoff"] = "19:00"
+                changes["afternoon_cutoff"] = "19:00"
+    if v < 3 and sorted(c.get("days") or []) == [1, 2, 3, 4, 5]:
+        c["days"] = [1, 2, 3, 4, 5, 6]
+        changes["days"] = "Monday to Saturday"
     with db.tx():
-        if changed:
+        if changes:
             db.kv_set("center", c)                     # every other setting is kept exactly as it was
-        db.kv_set("hoursV", 2)
-    if changed:
-        audit("settings.hours", "center", {"close": "20:00", "afternoon_cutoff": "19:00"}, actor="system")
+        db.kv_set("hoursV", HOURS_V)
+    if changes:
+        audit("settings.hours", "center", changes, actor="system")
         db.bump()
 
 

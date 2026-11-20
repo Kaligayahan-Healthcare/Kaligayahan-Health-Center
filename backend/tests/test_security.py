@@ -215,7 +215,7 @@ def cutoff_blocks_bookings():
 @test
 def old_5pm_closing_is_updated_to_8pm_once():
     saved = db.kv_get("center")
-    old = {**saved, "close": "17:00", "pharmacyEmail": "keep@example.com",
+    old = {**saved, "close": "17:00", "pharmacyEmail": "keep@example.com", "days": [1, 2, 3, 4, 5],
            "sessions": [{**s, "cutoff": "16:00"} if s["id"] == "pm" else s for s in saved["sessions"]]}
     db.kv_set("center", old)
     db.conn().execute("DELETE FROM kv WHERE key='hoursV'")
@@ -224,10 +224,16 @@ def old_5pm_closing_is_updated_to_8pm_once():
         c = db.kv_get("center")
         assert c["close"] == "20:00" and [s["cutoff"] for s in c["sessions"] if s["id"] == "pm"] == ["19:00"]
         assert c["pharmacyEmail"] == "keep@example.com" and c["open"] == saved["open"]      # nothing else changed
-        c["close"] = "18:00"                                  # a time staff chose later is never overwritten
+        assert c["days"] == [1, 2, 3, 4, 5, 6]                                              # open on Saturdays too
+        c["close"] = "18:00"                                  # times and days staff chose later are never overwritten
+        c["days"] = [1, 2, 3]
         db.kv_set("center", c)
         service.update_hours()
-        assert db.kv_get("center")["close"] == "18:00"
+        assert db.kv_get("center")["close"] == "18:00" and db.kv_get("center")["days"] == [1, 2, 3]
+        db.conn().execute("UPDATE kv SET value='2' WHERE key='hoursV'")     # a database already at 8 PM gets Saturday only
+        db.kv_set("center", {**saved, "days": [1, 2, 3, 4, 5], "close": "19:30"})
+        service.update_hours()
+        assert db.kv_get("center")["days"] == [1, 2, 3, 4, 5, 6] and db.kv_get("center")["close"] == "19:30"
     finally:
         db.kv_set("center", saved)
 

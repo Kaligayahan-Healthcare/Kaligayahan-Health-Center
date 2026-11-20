@@ -268,7 +268,7 @@ def needs_reorder(S, m) -> bool:
 
 # ---------- default setup for a brand-new database ----------
 def default_center():
-    return {"open": "08:00", "close": "20:00", "days": [1, 2, 3, 4, 5], "lunchStart": "12:00", "lunchEnd": "13:00",
+    return {"open": "08:00", "close": "20:00", "days": [1, 2, 3, 4, 5, 6], "lunchStart": "12:00", "lunchEnd": "13:00",
             "sessions": [{"id": "am", "name": "Morning", "tl": "Umaga", "start": "08:00", "cutoff": "11:00"},
                          {"id": "pm", "name": "Afternoon", "tl": "Hapon", "start": "13:00", "cutoff": "19:00"}],
             "force": "auto", "forceNote": "", "lockSite": False, "demo": False, "grace": 15,

@@ -1461,7 +1461,7 @@ function phHolidays(y){
 }
 
 function defaultCenter(){
-  return { open:'08:00', close:'20:00', days:[1,2,3,4,5], lunchStart:'12:00', lunchEnd:'13:00',
+  return { open:'08:00', close:'20:00', days:[1,2,3,4,5,6], lunchStart:'12:00', lunchEnd:'13:00',
     sessions:[ { id:'am', name:'Morning', tl:'Umaga', start:'08:00', cutoff:'11:00' }, { id:'pm', name:'Afternoon', tl:'Hapon', start:'13:00', cutoff:'19:00' } ],
     force:'auto', forceNote:'', lockSite:false, demo:false, grace:15,
     autoHolidays:true, noticeDays:1, smsOn:false, cutNow:null, restockPct:20, pharmacyEmail:'pharmacy@kaligayahan.example' };
@@ -1767,6 +1767,10 @@ function migrate(){
     const pm = (c.sessions || []).find(s => s.id === 'pm');
     if (pm && pm.cutoff === '16:00') pm.cutoff = '19:00';
     S.hoursV = 2; ch = true;
+  }
+  if (S.hoursV < 3) {                  // v2.5: also open on Saturdays (only if still the old Monday-to-Friday default)
+    if (Array.isArray(c.days) && c.days.slice().sort().join() === '1,2,3,4,5') c.days = [1,2,3,4,5,6];
+    S.hoursV = 3; ch = true;
   }
   if (!S.rev || S.rev < 3) {           // v2.3: staff accounts, sample-data label, practice mode off by default
     S.rev = 3; c.demo = false;
