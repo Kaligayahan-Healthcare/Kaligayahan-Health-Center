@@ -21,7 +21,7 @@ Commission (NPC, privacy.gov.ph)** or the city legal / ICT office before launch.
 | 7 | **Security of the server PC**: double-click `Check server PC security.bat` and fix every "FIX" (Windows password, disk encryption, screen lock). | Admin | ☐ |
 | 8 | **Recovery kit** copied to a USB drive or printed, and kept in a locked drawer. | Admin | ☐ |
 | 9 | **Breach procedure** (below) printed and known to the staff. | DPO | ☐ |
-| 10 | **If the database is on Supabase** (see SUPABASE.md): list Supabase as a **personal information processor** in the PIA, the Privacy Manual and the NPC registration. Note that the data is stored in **Singapore** (outside the Philippines) but encrypted before it leaves the health center, and that Supabase never has the key. Sign Supabase's **Data Processing Agreement** (DPA). The website's Privacy Notice already says this automatically when Supabase is in use. | DPO | ☐ |
+| 10 | **If the database is on Supabase** (see SUPABASE.md): list Supabase as a **personal information processor** in the PIA, the Privacy Manual and the NPC registration. Note that the data is stored in **Tokyo, Japan** (Supabase region Northeast Asia, `ap-northeast-1`) (outside the Philippines) but encrypted before it leaves the health center, and that Supabase never has the key. Sign Supabase's **Data Processing Agreement** (DPA). The website's Privacy Notice already says this automatically when Supabase is in use. | DPO | ☐ |
 
 ## What the system already does
 

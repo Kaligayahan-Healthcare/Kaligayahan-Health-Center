@@ -2,7 +2,7 @@
 
 The website (`../website`) is served by this Python server. The records are stored in one of two places:
 
-- **Supabase** (hosted PostgreSQL, Singapore), with a working copy on this computer for fast reading. See **docs/SUPABASE.md**; connect it with **Connect to Supabase.bat**.
+- **Supabase** (hosted PostgreSQL, Tokyo, Japan), with a working copy on this computer for fast reading. See **docs/SUPABASE.md**; connect it with **Connect to Supabase.bat**.
 - **A local SQLite database** on the health center computer, used until Supabase is connected.
 
 Either way, personal details are encrypted on this computer before they are stored. Every browser

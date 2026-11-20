@@ -33,7 +33,7 @@ hashes.
 2. Click **New project**.
    - **Name:** `kaligayahan-health-center`.
    - **Database password:** click **Generate a password** and keep it safe.
-   - **Region:** **Southeast Asia (Singapore)**.
+   - **Region:** the health center's project is in **Northeast Asia (Tokyo)**. Use the same region if the project is ever re-created, or update the privacy documents if it changes.
 3. Wait about 2 minutes until it is ready.
 4. Click **Connect** → **Session pooler** (port 5432) and copy the **URI**.
    - Not the Transaction pooler (port 6543).
@@ -56,8 +56,8 @@ when asked. Nothing is shown while you paste.
 - It saves the connection string in `secrets.json`, which only this Windows user can read.
 - The old database file is kept, renamed `bkhc.sqlite3.moved-to-supabase-<date>`.
 
-The server window then shows `Database: Supabase (PostgreSQL, Singapore), private schema bkhc`.
-In the staff portal, **Settings → Secure database** says **Stored on Supabase (Singapore)**.
+The server window then shows `Database: Supabase (PostgreSQL, Tokyo), private schema bkhc`.
+In the staff portal, **Settings → Secure database** says **Stored on Supabase (Tokyo)**.
 
 ## 3. Stronger: check Supabase's certificate (recommended)
 
